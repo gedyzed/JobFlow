@@ -1,10 +1,12 @@
 package main
 
 import (
+	"io"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gedyzed/JobFlow/JobService/controllers"
 	infra "github.com/gedyzed/JobFlow/JobService/infra"
@@ -22,8 +24,20 @@ func main() {
 		log.Println("Error loading .env file")
 	}
 
+	logDir := "logs"
+	if mkErr := os.MkdirAll(logDir, 0o755); mkErr != nil {
+		log.Fatalf("failed to create log directory: %v", mkErr)
+	}
+
+	logPath := filepath.Join(logDir, "jobservice.txt")
+	logFile, fileErr := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if fileErr != nil {
+		log.Fatalf("failed to open log file %s: %v", logPath, fileErr)
+	}
+	defer logFile.Close()
+
 	// setup logger
-	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	handler := slog.NewJSONHandler(io.MultiWriter(os.Stdout, logFile), &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	})
 

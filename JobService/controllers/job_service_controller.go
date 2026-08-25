@@ -1,11 +1,14 @@
 package controllers
 
 import (
+	"errors"
+	"encoding/json"
 	"log/slog"
 	"net/http"
-	"github.com/gedyzed/JobFlow/JobService/services"
-	"encoding/json"
+
+	"github.com/gedyzed/JobFlow/JobService/entities"
 	"github.com/gedyzed/JobFlow/JobService/models"
+	"github.com/gedyzed/JobFlow/JobService/services"
 )
 
 type JobServiceController struct {
@@ -23,18 +26,31 @@ func NewJobServiceController(service services.IJobService, logger *slog.Logger) 
 func (c *JobServiceController) CreateJob(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
-
-	var job models.Job
-	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		c.logger.Error("Failed to decode request body:", "error", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	idempotencyKey := r.Header.Get("Idempotency-Key")
+	if idempotencyKey == "" {
+		c.writeError(w, &entities.SafeError{
+			Code:     "missing_idempotency_key",
+			UserMsg:  "Idempotency-Key header is required",	
+			Internal: errors.New("missing Idempotency-Key header"),
+			Metadata: map[string]any{"operation": "create_job", "method": r.Method},
+		})
 		return
 	}
 
-	createdJob, err := c.service.CreateJob(&job)
+	var job models.Job
+	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
+		c.writeError(w, &entities.SafeError{
+			Code:     "invalid_request_body",
+			UserMsg:  "Invalid request body",
+			Internal: err,
+			Metadata: map[string]any{"operation": "create_job", "method": r.Method},
+		})
+		return
+	}
+
+	createdJob, err := c.service.CreateJob(&job, idempotencyKey)
 	if err != nil {
-		c.logger.Error("Failed to create job:", "error", err)
-		http.Error(w, "Failed to create job", http.StatusInternalServerError)
+		c.writeError(w, err)
 		return
 	}
 
@@ -49,20 +65,24 @@ func (c *JobServiceController) GetJobByID(w http.ResponseWriter, r *http.Request
 
 	var job models.Job
 	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		c.logger.Error("Failed to decode request body:", "error", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		c.writeError(w, &entities.SafeError{
+			Code:     "invalid_request_body",
+			UserMsg:  "Invalid request body",
+			Internal: err,
+			Metadata: map[string]any{"operation": "get_job_by_id", "method": r.Method},
+		})
 		return
 	}
 
-	if _,err := c.service.GetJobByID(job.JobID); err != nil {
-		c.logger.Error("Failed to get job by ID:", "error", err)
-		http.Error(w, "Failed to get job by ID", http.StatusInternalServerError)
+	fetchedJob, err := c.service.GetJobByID(job.JobID)
+	if err != nil {
+		c.writeError(w, err)
 		return
 	}	
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(job)
+	json.NewEncoder(w).Encode(fetchedJob)
 
 }
 func (c *JobServiceController) ListJobs(w http.ResponseWriter, r *http.Request) {
@@ -71,21 +91,25 @@ func (c *JobServiceController) ListJobs(w http.ResponseWriter, r *http.Request) 
 
 	var job models.Job
 	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		c.logger.Error("Failed to decode request body:", "error", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		c.writeError(w, &entities.SafeError{
+			Code:     "invalid_request_body",
+			UserMsg:  "Invalid request body",
+			Internal: err,
+			Metadata: map[string]any{"operation": "list_jobs", "method": r.Method},
+		})
 		return
 	}
 
-	if _, err := c.service.ListJobs(); err != nil {
-		c.logger.Error("Failed to list jobs:", "error", err)
-		http.Error(w, "Failed to list jobs", http.StatusInternalServerError)
+	jobs, err := c.service.ListJobs()
+	if err != nil {
+		c.writeError(w, err)
 		return
 	}	
 
 
 	w.Header().Set("Content-Type", "application/json")		
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(job)
+	json.NewEncoder(w).Encode(jobs)
 
 }
 func (c *JobServiceController) UpdateJob(w http.ResponseWriter, r *http.Request) {
@@ -94,14 +118,17 @@ func (c *JobServiceController) UpdateJob(w http.ResponseWriter, r *http.Request)
 
 	var job models.Job
 	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		c.logger.Error("Failed to decode request body:", "error", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		c.writeError(w, &entities.SafeError{
+			Code:     "invalid_request_body",
+			UserMsg:  "Invalid request body",
+			Internal: err,
+			Metadata: map[string]any{"operation": "update_job", "method": r.Method},
+		})
 		return
 	}
 
 	if err := c.service.UpdateJob(&job); err != nil {
-		c.logger.Error("Failed to update job:", "error", err)
-		http.Error(w, "Failed to update job", http.StatusInternalServerError)
+		c.writeError(w, err)
 		return
 	}
 
@@ -115,14 +142,17 @@ func (c *JobServiceController) DeleteJob(w http.ResponseWriter, r *http.Request)
 
 	var job models.Job
 	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		c.logger.Error("Failed to decode request body:", "error", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		c.writeError(w, &entities.SafeError{
+			Code:     "invalid_request_body",
+			UserMsg:  "Invalid request body",
+			Internal: err,
+			Metadata: map[string]any{"operation": "delete_job", "method": r.Method},
+		})
 		return
 	}
 
 	if err := c.service.DeleteJob(job.JobID); err != nil {
-		c.logger.Error("Failed to delete job:", "error", err)
-		http.Error(w, "Failed to delete job", http.StatusInternalServerError)
+		c.writeError(w, err)
 		return
 	}	
 
@@ -136,14 +166,17 @@ func (c *JobServiceController) CancelJob(w http.ResponseWriter, r *http.Request)
 
 	var job models.Job
 	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		c.logger.Error("Failed to decode request body:", "error", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		c.writeError(w, &entities.SafeError{
+			Code:     "invalid_request_body",
+			UserMsg:  "Invalid request body",
+			Internal: err,
+			Metadata: map[string]any{"operation": "cancel_job", "method": r.Method},
+		})
 		return
 	}
 
 	if err := c.service.CancelJob(job.JobID); err != nil {
-		c.logger.Error("Failed to cancel job:", "error", err)
-		http.Error(w, "Failed to cancel job", http.StatusInternalServerError)
+		c.writeError(w, err)
 		return
 	}	
 
@@ -157,18 +190,52 @@ func (c *JobServiceController) RetryJob(w http.ResponseWriter, r *http.Request) 
 
 	var job models.Job
 	if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
-		c.logger.Error("Failed to decode request body:", "error", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		c.writeError(w, &entities.SafeError{
+			Code:     "invalid_request_body",
+			UserMsg:  "Invalid request body",
+			Internal: err,
+			Metadata: map[string]any{"operation": "retry_job", "method": r.Method},
+		})
 		return
 	}
 
 	if err := c.service.RetryJob(job.JobID); err != nil {
-		c.logger.Error("Failed to retry job:", "error", err)
-		http.Error(w, "Failed to retry job", http.StatusInternalServerError)
+		c.writeError(w, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(job)
+}
+
+func (c *JobServiceController) writeError(w http.ResponseWriter, err error) {
+	status := http.StatusInternalServerError
+	response := map[string]string{
+		"code":    "internal_error",
+		"userMsg": "An unexpected error occurred",
+	}
+
+	var safeErr *entities.SafeError
+	if errors.As(err, &safeErr) {
+		switch safeErr.Code {
+		case "invalid_request_body":
+			status = http.StatusBadRequest
+		case "job_not_found":
+			status = http.StatusNotFound
+		}
+
+		logAttrs := []any{"code", safeErr.Code, "error", safeErr.Internal}
+		if safeErr.Metadata != nil {
+			logAttrs = append(logAttrs, "metadata", safeErr.Metadata)
+		}
+		c.logger.Error(safeErr.UserMsg, logAttrs...)
+		response = safeErr.Response()
+	} else {
+		c.logger.Error("Unhandled error", "error", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(response)
 }

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"encoding/json"
 	"log/slog"
 
 	"github.com/gedyzed/JobFlow/JobService/models"
@@ -10,6 +11,9 @@ import (
 type IJobRepo interface {
 	GetJobByID(id string) (*models.Job, error)
 	CreateJob(job *models.Job) (*models.Job, error)
+	CreateIdempotencyKey(idempotencyKey *models.IdempotencyKey) error
+	GetIdempotencyKeyByKey(idempotencyKey string) (*models.IdempotencyKey, error)
+	UpdateIdempotencyKeyResponse(idempotencyKey string, response json.RawMessage) error
 	ListJobs() ([]*models.Job, error)
 	UpdateJob(job *models.Job) error
 	DeleteJob(id string) error
@@ -38,9 +42,31 @@ func (r *JobRepo) GetJobByID(id string) (*models.Job, error) {
 }
 
 func (r *JobRepo) CreateJob(job *models.Job) (*models.Job, error) {
-	if err := r.db.Create(job).Error; err != nil {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(job).Error; err != nil {
+			return err
+		}
+
+		payload, err := json.Marshal(job)
+		if err != nil {
+			return err
+		}
+
+		outbox := &models.Outbox{
+			EventType: "job.created",
+			Payload:   payload,
+			JobID:     job.JobID,
+		}
+		if err := tx.Create(outbox).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
+
 	return job, nil
 } 
 
@@ -84,5 +110,24 @@ func (r *JobRepo) updateStatus(id string, status string) error {
 	return nil
 }
 
+func (r *JobRepo) CreateIdempotencyKey(idempotencyKey *models.IdempotencyKey) error {
+	return r.db.Create(idempotencyKey).Error
+}
 
+func (r *JobRepo) GetIdempotencyKeyByKey(idempotencyKey string) (*models.IdempotencyKey, error) {
+	var key models.IdempotencyKey
+	if err := r.db.First(&key, "idempotency_key = ?", idempotencyKey).Error; err != nil {
+		return nil, err
+	}
+	return &key, nil
+}
+
+func (r *JobRepo) UpdateIdempotencyKeyResponse(idempotencyKey string, response json.RawMessage) error {
+	return r.db.Model(&models.IdempotencyKey{}).
+		Where("idempotency_key = ?", idempotencyKey).
+		Updates(map[string]any{
+			"response": response,
+			"status":   "completed",
+		}).Error
+}
 	

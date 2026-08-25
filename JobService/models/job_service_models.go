@@ -67,14 +67,4 @@ type IdempotencyKey struct {
     gorm.Model
 }
 
-func (key *IdempotencyKey) BeforeCreate(tx *gorm.DB) error {
-	if key.IdempotencyKey == "" {
-		idempotencyKey, err := uuid.NewV7()
-		if err != nil {
-			return err
-		}
-		key.IdempotencyKey = idempotencyKey.String()
-	}
-	return nil
-}
 
