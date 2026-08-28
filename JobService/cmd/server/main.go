@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"fmt"
 
 	"github.com/gedyzed/JobFlow/JobService/controllers"
 	infra "github.com/gedyzed/JobFlow/JobService/infra"
@@ -47,15 +48,14 @@ func main() {
 	// Load configuration
 	configs, err := configs.LoadConfig()
 	if err != nil {
-		slog.Error("Failed to load configuration:", "error", err)
+		slog.Error("Failed to load configuration", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
-    
 
 	// Initialize the database connection
 	db, err := infra.DBInit(configs.DB)
 	if err != nil {
-		slog.Error("Failed to initialize database connection:", "error", err)
+		slog.Error("Failed to initialize database connection", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 
@@ -76,7 +76,7 @@ func main() {
 	}
 	slog.Info("Starting server on port http://localhost:" + configs.APP.Port)
 	if err := http.ListenAndServe(":"+configs.APP.Port, router); err != nil {
-		slog.Error("HTTP server stopped", "error", err)
+		slog.Error("HTTP server stopped", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 }

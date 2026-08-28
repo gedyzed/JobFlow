@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -27,7 +28,7 @@ func (job *Job) BeforeCreate(tx *gorm.DB) error {
 	if job.JobID == "" {
 		jobID, err := uuid.NewV7()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "generate job UUIDv7")
 		}
 		job.JobID = jobID.String()
 	}
@@ -50,7 +51,7 @@ func (outbox *Outbox) BeforeCreate(tx *gorm.DB) error {
 	if outbox.OutboxID == "" {
 		outboxID, err := uuid.NewV7()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "generate outbox UUIDv7")
 		}
 		outbox.OutboxID = outboxID.String()
 	}
@@ -66,5 +67,17 @@ type IdempotencyKey struct {
     ExpiresAt      time.Time       `json:"expires_at" gorm:"not null;index"`
     gorm.Model
 }
+
+func (key *IdempotencyKey) BeforeCreate(tx *gorm.DB) error {
+	if key.IdempotencyKey == "" {
+		idempotencyKey, err := uuid.NewV7()
+		if err != nil {
+			return errors.Wrap(err, "generate idempotency key UUIDv7")
+		}
+		key.IdempotencyKey = idempotencyKey.String()
+	}
+	return nil
+}
+
 
 

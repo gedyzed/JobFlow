@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	
+
+	"github.com/cockroachdb/errors"
 )
 
 type Config struct {
@@ -36,7 +37,7 @@ func LoadConfig() (*Config, error) {
 	dbName := os.Getenv("DB_NAME")
 	dbPassword, err := readSecret("DB_PASSWORD", "DB_PASSWORD_FILE")
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "load database password")
 	}
 
 	for name, value := range map[string]string{
@@ -47,7 +48,7 @@ func LoadConfig() (*Config, error) {
 		"DB_PASSWORD": dbPassword,
 	} {
 		if value == "" {
-			return nil, fmt.Errorf("required configuration %s is not set", name)
+			return nil, errors.Errorf("required configuration %s is not set", name)
 		}
 	}
 
@@ -78,7 +79,7 @@ func readSecret(valueName, fileName string) (string, error) {
 	}
 	secret, err := os.ReadFile(path)
 	if err != nil {
-		return "", fmt.Errorf("read %s: %w", fileName, err)
+		return "", errors.Wrapf(err, "read %s", fileName)
 	}
 
 	return strings.TrimSpace(string(secret)), nil

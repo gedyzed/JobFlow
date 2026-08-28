@@ -33,7 +33,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (rg *RouteGroup) HandleFunc(method string, path string, handler http.HandlerFunc) {
-	fullPath := rg.prefix + cleanPath(path)
+	fullPath := rg.prefix + cleanPath(convertPathParams(path))
 	pattern := fmt.Sprintf("%s %s", strings.ToUpper(method), fullPath)
 
 	var finalHandler http.Handler = handler
@@ -77,4 +77,14 @@ func cleanPath(p string) string {
 		return "/" + p
 	}
 	return p
+}
+
+func convertPathParams(p string) string {
+	parts := strings.Split(p, "/")
+	for i, part := range parts {
+		if strings.HasPrefix(part, ":") && len(part) > 1 {
+			parts[i] = "{" + part[1:] + "}"
+		}
+	}
+	return strings.Join(parts, "/")
 }
