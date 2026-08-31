@@ -11,10 +11,20 @@ import (
 type Config struct {
 	DB DBConfig 
 	APP APPConfig
+	RabbitMQ RabbitMQConfig
 }
 
 type APPConfig struct {
 	Port string
+}
+
+type RabbitMQConfig struct {
+	URL      string
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Name     string
 }
 
 type DBConfig struct {
@@ -36,6 +46,13 @@ func LoadConfig() (*Config, error) {
 	dbUser := os.Getenv("DB_USER")
 	dbName := os.Getenv("DB_NAME")
 	dbPassword, err := readSecret("DB_PASSWORD", "DB_PASSWORD_FILE")
+
+	// RabbitMQ configuration
+	rmqHost := os.Getenv("RABBITMQ_HOST")
+	rmqPort := os.Getenv("RABBITMQ_PORT")
+	rmqUser := os.Getenv("RABBITMQ_USER")
+	rmqPassword := os.Getenv("RABBITMQ_PASSWORD")
+
 	if err != nil {
 		return nil, errors.Wrap(err, "load database password")
 	}
@@ -63,6 +80,13 @@ func LoadConfig() (*Config, error) {
 			User:     dbUser,
 			Password: dbPassword,
 			Name:     dbName,
+		},
+		RabbitMQ: RabbitMQConfig{
+			URL:      fmt.Sprintf("amqp://%s:%s@%s:%s/", rmqUser, rmqPassword, rmqHost, rmqPort),
+			Host:     rmqHost,
+			Port:     rmqPort,
+			User:     rmqUser,
+			Password: rmqPassword,
 		},
 	}, nil
 }
