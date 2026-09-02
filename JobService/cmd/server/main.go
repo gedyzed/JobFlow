@@ -1,13 +1,15 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
-	"fmt"
+	"time"
 
 	"github.com/gedyzed/JobFlow/JobService/controllers"
 	infra "github.com/gedyzed/JobFlow/JobService/infra"
@@ -62,10 +64,25 @@ func main() {
 	// Initialize the job repository
 	jobRepo := repositories.NewJobRepo(db, logger)
 
-	// Initialize the job service
+	// Initialize the jobservice
 	jobService := services.NewJobService(jobRepo, logger)
+	rMqService := infra.NewRabbitMQService(configs.RabbitMQ, logger)
 
-	// Initialize the job controller
+	// Initialize the RabbitMQ client
+	rmqClient := infra.NewRMQClient(rMqService)
+	if err := rmqClient.Connect(context.Background()); err != nil {
+		slog.Error("Failed to connect to RabbitMQ", "error", err, "error_detail", fmt.Sprintf("%+v", err))
+		os.Exit(1)
+	}
+	defer rmqClient.Close(context.Background())
+
+	relayRepo := repositories.NewRelayRepo(db, rmqClient, logger)
+	relayService := services.NewRelayService(relayRepo, logger)
+
+	outboxRelay := infra.NewOutboxRelay(time.Second*2, relayService, logger)
+	go outboxRelay.Start(context.Background())
+
+	// Initialize the controllers
 	jobController := controllers.NewJobServiceController(jobService, logger)
 
 	router := routes.NewRouter()

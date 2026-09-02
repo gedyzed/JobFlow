@@ -32,3 +32,4 @@ generate_secrets.sh
 # Editor/IDE
 .idea/
 .vscode/
+.txt
