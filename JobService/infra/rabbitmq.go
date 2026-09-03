@@ -72,6 +72,12 @@ func (c *RMQClient) Connect(ctx context.Context) error {
 
 // Publish sends raw bytes to the configured queue.
 func (c *RMQClient) Publish(ctx context.Context, msg []byte) error {
+	if c.conn == nil {
+		if err := c.Connect(ctx); err != nil {
+			return errors.Wrap(err, "RabbitMQ unavailable")
+		}
+	}
+
 	if c.publisher == nil {
 		queueName := c.service.Config.Name
 		pub, err := c.conn.NewPublisher(ctx, &rmq.QueueAddress{Queue: queueName}, nil)

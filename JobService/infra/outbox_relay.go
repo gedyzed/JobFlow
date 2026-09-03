@@ -44,6 +44,7 @@ func (o *OutboxRelay) Stop() {
 }
 
 func (o *OutboxRelay) pollAndPublish(ctx context.Context) {
+	o.logger.Debug("polling outbox table for unpublished events")
 	err := o.service.PollAndPublish(ctx, 100)
 	if err != nil {
 		o.logger.Error("failed to poll and publish outbox events", "error", err)

@@ -4,6 +4,7 @@ CREATE TABLE outboxes (
     event_type      VARCHAR(100) NOT NULL,
     payload         JSONB NOT NULL,
     job_id          VARCHAR(36) NOT NULL,
+
     published_at    TIMESTAMPTZ NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

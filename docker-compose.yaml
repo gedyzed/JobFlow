@@ -23,6 +23,40 @@ services:
     networks:
       - internal
       - job-network
+    
+  relay:
+    build:
+      context: ./JobService
+      dockerfile: Dockerfile
+    container_name: job-relay
+    restart: on-failure
+    entrypoint: ["/server/relay"]
+    ports:
+      - "8081:8080"
+    environment:
+      PORT: ${PORT:-8081}
+      DB_NAME: ${DB_NAME:-jobdb}
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_USER: ${RABBITMQ_USER:-jobflow}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-jobflow}
+      RABBITMQ_QUEUE_NAME: ${RABBITMQ_QUEUE_NAME:-job_queue}
+    volumes:
+      - ./secrets/db_password.txt:/run/secrets/db_password:ro
+    secrets:
+      - db_password
+    depends_on:
+      postgres:
+          condition: service_healthy
+      rabbitmq:
+          condition: service_healthy
+    networks:
+      - internal
+      - job-network
 
   postgres:
     image: postgres:16-alpine
@@ -54,11 +88,17 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-jobflow}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-jobflow}
       RABBITMQ_PLUGINS: rabbitmq_amqp1_0
     networks:
       - job-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 
 secrets:

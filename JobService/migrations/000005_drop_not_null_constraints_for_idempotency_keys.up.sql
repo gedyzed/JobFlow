@@ -1,0 +1,11 @@
+ALTER TABLE IDEMPOTENCY_KEYS 
+ALTER COLUMN JOB_ID DROP NOT NULL;
+
+ALTER TABLE IDEMPOTENCY_KEYS
+DROP CONSTRAINT fk_idempotency_keys_jobs;
+
+
+ALTER TABLE IDEMPOTENCY_KEYS
+ADD constraint fk_idempotency_keys_jobs
+    FOREIGN KEY (job_id)
+    REFERENCES jobs (job_id);

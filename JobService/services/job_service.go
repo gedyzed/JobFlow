@@ -34,13 +34,13 @@ func NewJobService(repo repositories.IJobRepo, logger *slog.Logger) IJobService 
 }
 
 func (s *JobService) CreateJob(job *models.Job, idempotencyKey string) (*models.Job, error) {
+
 	if idempotencyKey == "" {
 		return nil, errors.Wrap(models.ErrMissingIdempotencyKey, "service create job")
 	}
 
 	idempotencyRecord := &models.IdempotencyKey{
 		IdempotencyKey: idempotencyKey,
-		JobID:          job.JobID,
 		UserID:         job.UserID,
 		Status:         "pending",
 		ExpiresAt:      time.Now().Add(1 * time.Hour),

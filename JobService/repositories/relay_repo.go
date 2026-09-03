@@ -56,6 +56,11 @@ func (r *RelayRepo) PollAndPublish(ctx context.Context, limit int) error {
 		if err != nil {
 			return errors.Wrap(err, "Failed to fetch unpublished events")
 		}
+		if len(rows) > 0 {
+			r.logger.Info("fetched unpublished outbox events", "count", len(rows))
+		} else {
+			r.logger.Debug("no unpublished outbox events found in db")
+		}
 		for _, row := range rows {
 			if err := r.Publisher.PublishEvent(ctx, row); err != nil {
 				r.logger.Error("Failed to publish event", "error", err, "event_id", row.ID)
@@ -66,7 +71,9 @@ func (r *RelayRepo) PollAndPublish(ctx context.Context, limit int) error {
 				Where("id = ?", row.ID).
 				Update("published", true).
 				Error; err != nil {
-				r.logger.Error("Failed to publish event", "error", err, "event_id", row.ID)
+				r.logger.Error("Failed to mark event as published", "error", err, "event_id", row.ID)
+			} else {
+				r.logger.Info("successfully published and marked outbox event", "event_id", row.ID, "event_type", row.EventType)
 			}
 		}
 		return nil
