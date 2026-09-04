@@ -1,0 +1,109 @@
+{
+  "jobs": [
+    {
+      "job_id": "01a067a1-248e-779a-9fba-a101f0f2b918",
+      "user_id": "user_123",
+      "type": "SEND_EMAIL",
+      "status": "pending",
+      "payload": {
+        "to": ["alice@example.com", "bob@example.com", "charlie@example.com"],
+        "subject": "Welcome to JobFlow",
+        "body": "Your account has been created successfully.",
+        "from": "no-reply@example.com"
+      }
+    },
+    {
+      "job_id": "01a067a1-248e-779a-9fba-a101f0f2b919",
+      "user_id": "user_123",
+      "type": "GENERATE_REPORT",
+      "status": "running",
+      "payload": {
+        "report_type": "MONTHLY_SALES",
+        "format": "PDF",
+        "filters": {
+          "start_date": "2026-01-01",
+          "end_date": "2026-01-31",
+          "region": "US"
+        }
+      }
+    },
+    {
+      "job_id": "01a067a1-248e-779a-9fba-a101f0f2b920",
+      "user_id": "user_123",
+      "type": "EXTRACT_DATA",
+      "status": "completed",
+      "result_key": "results/job-01a067a1-248e-779a-9fba-a101f0f2b920.json",
+      "payload": {
+        "source": "s3://my-bucket/exports/data.csv",
+        "format": "CSV",
+        "query": "SELECT * FROM export_table"
+      }
+    },
+    {
+      "job_id": "01a067a1-248e-779a-9fba-a101f0f2b921",
+      "user_id": "user_123",
+      "type": "SEND_EMAIL",
+      "status": "failed",
+      "error": "operation timed out while connecting to SMTP server",
+      "payload": {
+        "to": ["dan@example.com"],
+        "subject": "System Warning",
+        "body": "Action required on your account.",
+        "from": "alerts@example.com"
+      }
+    },
+    {
+      "job_id": "01a067a1-248e-779a-9fba-a101f0f2b922",
+      "user_id": "user_123",
+      "type": "SEND_EMAIL",
+      "status": "cancelled",
+      "payload": {
+        "to": ["support@example.com"],
+        "subject": "Cancellation notice",
+        "body": "Job has been aborted by user request.",
+        "from": "no-reply@example.com"
+      }
+    }
+  ],
+  "idempotency_keys": [
+    {
+      "idempotency_key": "unique-idempotency-key",
+      "user_id": "user_123",
+      "status": "pending",
+      "expires_at": "2026-12-31T23:59:59Z"
+    },
+    {
+      "idempotency_key": "cached-idempotency-key",
+      "job_id": "01a067a1-248e-779a-9fba-a101f0f2b920",
+      "user_id": "user_123",
+      "status": "completed",
+      "response": {
+        "job_id": "01a067a1-248e-779a-9fba-a101f0f2b920",
+        "user_id": "user_123",
+        "type": "EXTRACT_DATA",
+        "status": "completed",
+        "result_key": "results/job-01a067a1-248e-779a-9fba-a101f0f2b920.json",
+        "payload": {
+          "source": "s3://my-bucket/exports/data.csv",
+          "format": "CSV",
+          "query": "SELECT * FROM export_table"
+        }
+      },
+      "expires_at": "2026-12-31T23:59:59Z"
+    }
+  ],
+  "outbox_events": [
+    {
+      "outbox_id": "01a067a1-248e-779a-9fba-a101f0f2b930",
+      "event_type": "job.created",
+      "job_id": "01a067a1-248e-779a-9fba-a101f0f2b918",
+      "payload": {
+        "job_id": "01a067a1-248e-779a-9fba-a101f0f2b918",
+        "user_id": "user_123",
+        "type": "SEND_EMAIL",
+        "status": "pending"
+      },
+      "attempts": 0
+    }
+  ]
+}

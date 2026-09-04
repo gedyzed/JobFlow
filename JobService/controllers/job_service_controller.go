@@ -53,7 +53,7 @@ func (c *JobServiceController) CreateJob(w http.ResponseWriter, r *http.Request)
 	}
 
 	job := req.ToJob()
-	createdJob, err := c.service.CreateJob(job, idempotencyKey)
+		createdJob, err := c.service.CreateJob(job, idempotencyKey)
 	if err != nil {
 		c.writeError(w, err)
 		return

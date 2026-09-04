@@ -1,0 +1,11 @@
+dir: "mocks/{{.PackageName}}"
+outpkg: "mocks"
+
+packages:
+  github.com/gedyzed/JobFlow/JobService/repositories:
+    config:
+      recursive: true
+    interfaces:
+       IJobRepo: {}
+       
+  
