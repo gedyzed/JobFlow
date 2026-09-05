@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/cockroachdb/errors"
 	"github.com/gedyzed/JobFlow/JobService/models"
@@ -20,17 +21,17 @@ type Publisher interface {
 }
 
 type RelayRepo struct {
-	db     		*gorm.DB
-	Publisher 	Publisher
-	logger 		*slog.Logger
+	db        *gorm.DB
+	Publisher Publisher
+	logger    *slog.Logger
 }
 
 func NewRelayRepo(db *gorm.DB, publisher Publisher, logger *slog.Logger) IRelayRepo {
 
 	return &RelayRepo{
-		db: db,
+		db:        db,
 		Publisher: publisher,
-		logger: logger,
+		logger:    logger,
 	}
 }
 func (r *RelayRepo) FetchUnPublishedEvents(ctx context.Context, tx *gorm.DB, limit int) ([]models.Outbox, error) {
@@ -64,6 +65,17 @@ func (r *RelayRepo) PollAndPublish(ctx context.Context, limit int) error {
 		for _, row := range rows {
 			if err := r.Publisher.PublishEvent(ctx, row); err != nil {
 				r.logger.Error("Failed to publish event", "error", err, "event_id", row.ID)
+				continue
+			}
+			scheduledAt := time.Now()
+			if err := tx.WithContext(ctx).
+				Model(&models.Job{}).
+				Where("job_id = ?", row.JobID).
+				Updates(map[string]interface{}{
+					"status":       models.StatusScheduled,
+					"scheduled_at": scheduledAt,
+				}).Error; err != nil {
+				r.logger.Error("Failed to mark job as scheduled", "error", err, "job_id", row.JobID, "event_id", row.ID)
 				continue
 			}
 			if err := tx.WithContext(ctx).

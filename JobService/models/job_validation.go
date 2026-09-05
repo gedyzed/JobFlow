@@ -14,6 +14,7 @@ import (
 const (
 	StatusPending   = "pending"
 	StatusRunning   = "running"
+	StatusScheduled = "scheduled"
 	StatusCompleted = "completed"
 	StatusFailed    = "failed"
 	StatusCancelled = "cancelled"
@@ -25,6 +26,7 @@ var ValidStatuses = map[string]bool{
 	StatusCompleted: true,
 	StatusFailed:    true,
 	StatusCancelled: true,
+	StatusScheduled: true,
 }
 
 // IsValidStatus checks if a given status string is a recognized job status.

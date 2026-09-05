@@ -53,6 +53,9 @@ func LoadConfig() (*Config, error) {
 	rmqUser := os.Getenv("RABBITMQ_USER")
 	rmqPassword := os.Getenv("RABBITMQ_PASSWORD")
 	rmqName := os.Getenv("RABBITMQ_QUEUE_NAME")
+	if rmqName == "" {
+		rmqName = "job_queue"
+	}
 
 	if err != nil {
 		return nil, errors.Wrap(err, "load database password")
