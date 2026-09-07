@@ -65,12 +65,17 @@ func main() {
 	// Initialize RabbitMQ service and client with retries
 	rMqService := infra.NewRabbitMQService(cfg.RabbitMQ, logger)
 	rmqClient := infra.NewRMQClient(rMqService)
+	s3Client, err := infra.NewObjectStorage(context.Background(), cfg.ObjectStorage)
+	if err != nil {
+		slog.Error("Failed to initialize S3 client", "error", err, "error_detail", fmt.Sprintf("%+v", err))
+		os.Exit(1)
+	}
 
 	// email sender
 	emailSender := emailsender.NewEmailSender(cfg)
 
 	// worker service
-	workerService := worker.NewWorkerService(logger, rmqClient, emailSender)
+	workerService := worker.NewWorkerService(logger, rmqClient, emailSender, s3Client)
 
 	// Setup graceful shutdown context
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

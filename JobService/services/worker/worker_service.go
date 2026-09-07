@@ -22,13 +22,15 @@ type WorkerService struct {
 	logger      *slog.Logger
 	rmqClient   models.IRMQClient
 	emailSender ISendEmail
+	s3Client models.IObjectStorage
 }
 
-func NewWorkerService(logger *slog.Logger, rmqClient models.IRMQClient, emailSender ISendEmail) IWorkerService {
+func NewWorkerService(logger *slog.Logger, rmqClient models.IRMQClient, emailSender ISendEmail, s3Client models.IObjectStorage) IWorkerService {
 	return &WorkerService{
 		logger:      logger,
 		rmqClient:   rmqClient,
 		emailSender: emailSender,
+		s3Client: s3Client,
 	}
 }
 

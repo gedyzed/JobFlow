@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"io"
 )
 
 type PublisherTarget struct {
@@ -33,4 +34,10 @@ type IRMQClient interface {
 	// Factory methods
 	NewPublisher(ctx context.Context, target PublisherTarget) (Publisher, error)
 	NewConsumer(ctx context.Context, queueName string) (Consumer, error)
+}
+
+type IObjectStorage interface {
+	GetObject(ctx context.Context, objectKey string) (io.Reader, error)
+	PutObject(ctx context.Context, objectKey string, data io.Reader, contentType *string) error
+	DeleteObject(ctx context.Context, objectKey string) error
 }

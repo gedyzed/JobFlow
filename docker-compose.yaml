@@ -45,6 +45,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-jobflow}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-jobflow}
       RABBITMQ_QUEUE_NAME: ${RABBITMQ_QUEUE_NAME:-job_queue}
+      DEBUG: ${DEBUG:-true}
     volumes:
       - ./secrets/db_password.txt:/run/secrets/db_password:ro
     secrets:

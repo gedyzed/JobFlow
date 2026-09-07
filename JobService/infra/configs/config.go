@@ -12,6 +12,7 @@ type Config struct {
 	DB DBConfig 
 	APP APPConfig
 	RabbitMQ RabbitMQConfig
+	ObjectStorage ObjectStorageConfig
 }
 
 type APPConfig struct {
@@ -36,6 +37,14 @@ type DBConfig struct {
 	Name     string
 }
 
+type ObjectStorageConfig struct {
+	Endpoint        string
+	AccessKeyID     string
+	SecretAccessKey string
+	BucketName      string
+	Region 		   string
+}
+
 func LoadConfig() (*Config, error) {
 	// App configuration
 	Port := os.Getenv("PORT")
@@ -47,6 +56,20 @@ func LoadConfig() (*Config, error) {
 	dbName := os.Getenv("DB_NAME")
 	dbPassword, err := readSecret("DB_PASSWORD", "DB_PASSWORD_FILE")
 
+	if err != nil {
+		return nil, errors.Wrap(err, "load database password")
+	}
+
+	if err := validateRequiredConfig(map[string]string{
+		"DB_HOST":     dbHost,
+		"DB_PORT":     dbPort,
+		"DB_USER":     dbUser,
+		"DB_NAME":     dbName,
+		"DB_PASSWORD": dbPassword,
+	}); err != nil {
+		return nil, err
+	}
+	
 	// RabbitMQ configuration
 	rmqHost := os.Getenv("RABBITMQ_HOST")
 	rmqPort := os.Getenv("RABBITMQ_PORT")
@@ -56,23 +79,32 @@ func LoadConfig() (*Config, error) {
 	if rmqName == "" {
 		rmqName = "job_queue"
 	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "load database password")
+	if err := validateRequiredConfig(map[string]string{
+		"RABBITMQ_HOST":     rmqHost,
+		"RABBITMQ_PORT":     rmqPort,
+		"RABBITMQ_USER":     rmqUser,
+		"RABBITMQ_PASSWORD": rmqPassword,
+	}); err != nil {
+		return nil, err
 	}
 
-	for name, value := range map[string]string{
-		"DB_HOST":     dbHost,
-		"DB_PORT":     dbPort,
-		"DB_USER":     dbUser,
-		"DB_NAME":     dbName,
-		"DB_PASSWORD": dbPassword,
-	} {
-		if value == "" {
-			return nil, errors.Errorf("required configuration %s is not set", name)
-		}
-	}
+	// Object Storage configuration
+	osEndpoint := os.Getenv("OBJECT_STORAGE_ENDPOINT")
+	osAccessKeyID := os.Getenv("OBJECT_STORAGE_ACCESS_KEY_ID")
+	osSecretAccessKey := os.Getenv("OBJECT_STORAGE_SECRET_ACCESS_KEY")
+	osBucketName := os.Getenv("OBJECT_STORAGE_BUCKET_NAME")
+	osRegion := os.Getenv("OBJECT_STORAGE_REGION")
 
+	if err := validateRequiredConfig(map[string]string{
+		"OBJECT_STORAGE_ENDPOINT":        osEndpoint,
+		"OBJECT_STORAGE_ACCESS_KEY_ID":   osAccessKeyID,
+		"OBJECT_STORAGE_SECRET_ACCESS_KEY": osSecretAccessKey,
+		"OBJECT_STORAGE_BUCKET_NAME":     osBucketName,
+		"OBJECT_STORAGE_REGION":          osRegion,
+	}); err != nil {
+		return nil, err
+	}
+	
 	return &Config{
 		APP: APPConfig{
 			Port: Port,
@@ -93,9 +125,24 @@ func LoadConfig() (*Config, error) {
 			Password: rmqPassword,
 			Name:     rmqName,
 		},
+		ObjectStorage: ObjectStorageConfig{
+			Endpoint:        osEndpoint,
+			AccessKeyID:     osAccessKeyID,
+			SecretAccessKey: osSecretAccessKey,
+			BucketName:      osBucketName,
+		},
 	}, nil
 }
 
+func validateRequiredConfig(config map[string]string) error {
+	for name, value := range config {
+		if value == "" {
+			return errors.Errorf("required configuration %s is not set", name)
+		}
+	}
+
+	return nil
+}
 
 func readSecret(valueName, fileName string) (string, error) {
 	if value := os.Getenv(valueName); value != "" {
