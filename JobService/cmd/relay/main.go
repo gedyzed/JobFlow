@@ -69,28 +69,10 @@ func main() {
 
 	// Initialize the database connection with retries
 	var db *gorm.DB
-	const maxDBRetries = 15
-	for attempt := 1; attempt <= maxDBRetries; attempt++ {
-		select {
-		case <-ctx.Done():
-			slog.Info("Shutdown received while waiting for Database")
-			return
-		default:
-		}
-
-		db, err = infra.DBInit(cfg.DB)
-		if err == nil {
-			break
-		}
-
-		slog.Warn("Waiting for Database connection...", "attempt", attempt, "max_attempts", maxDBRetries, "error", err)
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(2 * time.Second):
-		}
-	}
-	if err != nil {
+	if err := infra.Retry(ctx, "Database", 5, 5 * time.Second, func() (dbErr error) {
+		db, dbErr = infra.DBInit(cfg.DB)
+		return dbErr
+	}); err != nil {
 		slog.Error("Failed to initialize database connection after retries", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
@@ -99,31 +81,10 @@ func main() {
 	rMqService := infra.NewRabbitMQService(cfg.RabbitMQ, logger)
 	rmqClient := infra.NewRMQClient(rMqService)
 
-	const maxRMQRetries = 15
-	var rmqErr error
-	for attempt := 1; attempt <= maxRMQRetries; attempt++ {
-		select {
-		case <-ctx.Done():
-			slog.Info("Shutdown received while waiting for RabbitMQ")
-			return
-		default:
-		}
-
-		rmqErr = rmqClient.Connect(ctx)
-		if rmqErr == nil {
-			break
-		}
-
-		slog.Warn("Waiting for RabbitMQ connection...", "attempt", attempt, "max_attempts", maxRMQRetries, "error", rmqErr)
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(2 * time.Second):
-		}
-	}
-
-	if rmqErr != nil {
-		slog.Error("Failed to connect to RabbitMQ after retries", "error", rmqErr, "error_detail", fmt.Sprintf("%+v", rmqErr))
+	if err := infra.Retry(ctx, "RabbitMQ", 5, 5 * time.Second, func() error {
+		return rmqClient.Connect(ctx)
+	}); err != nil {
+		slog.Error("Failed to connect to RabbitMQ after retries", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 	defer func() {

@@ -9,10 +9,16 @@ import (
 )
 
 type Config struct {
-	DB DBConfig 
-	APP APPConfig
-	RabbitMQ RabbitMQConfig
+	DB            DBConfig
+	APP           APPConfig
+	RabbitMQ      RabbitMQConfig
 	ObjectStorage ObjectStorageConfig
+	Email         EmailConfig
+}
+
+type EmailConfig struct {
+	APIKey string
+	Domain string
 }
 
 type APPConfig struct {
@@ -42,7 +48,7 @@ type ObjectStorageConfig struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	BucketName      string
-	Region 		   string
+	Region          string
 }
 
 func LoadConfig() (*Config, error) {
@@ -69,7 +75,7 @@ func LoadConfig() (*Config, error) {
 	}); err != nil {
 		return nil, err
 	}
-	
+
 	// RabbitMQ configuration
 	rmqHost := os.Getenv("RABBITMQ_HOST")
 	rmqPort := os.Getenv("RABBITMQ_PORT")
@@ -79,14 +85,14 @@ func LoadConfig() (*Config, error) {
 	if rmqName == "" {
 		rmqName = "job_queue"
 	}
-	if err := validateRequiredConfig(map[string]string{
-		"RABBITMQ_HOST":     rmqHost,
-		"RABBITMQ_PORT":     rmqPort,
-		"RABBITMQ_USER":     rmqUser,
-		"RABBITMQ_PASSWORD": rmqPassword,
-	}); err != nil {
-		return nil, err
-	}
+	// if err := validateRequiredConfig(map[string]string{
+	// 	"RABBITMQ_HOST":     rmqHost,
+	// 	"RABBITMQ_PORT":     rmqPort,
+	// 	"RABBITMQ_USER":     rmqUser,
+	// 	"RABBITMQ_PASSWORD": rmqPassword,
+	// }); err != nil {
+	// 	return nil, err
+	// }
 
 	// Object Storage configuration
 	osEndpoint := os.Getenv("OBJECT_STORAGE_ENDPOINT")
@@ -95,16 +101,36 @@ func LoadConfig() (*Config, error) {
 	osBucketName := os.Getenv("OBJECT_STORAGE_BUCKET_NAME")
 	osRegion := os.Getenv("OBJECT_STORAGE_REGION")
 
-	if err := validateRequiredConfig(map[string]string{
-		"OBJECT_STORAGE_ENDPOINT":        osEndpoint,
-		"OBJECT_STORAGE_ACCESS_KEY_ID":   osAccessKeyID,
-		"OBJECT_STORAGE_SECRET_ACCESS_KEY": osSecretAccessKey,
-		"OBJECT_STORAGE_BUCKET_NAME":     osBucketName,
-		"OBJECT_STORAGE_REGION":          osRegion,
-	}); err != nil {
-		return nil, err
+	// if err := validateRequiredConfig(map[string]string{
+	// 	"OBJECT_STORAGE_ENDPOINT":          osEndpoint,
+	// 	"OBJECT_STORAGE_ACCESS_KEY_ID":     osAccessKeyID,
+	// 	"OBJECT_STORAGE_SECRET_ACCESS_KEY": osSecretAccessKey,
+	// 	"OBJECT_STORAGE_BUCKET_NAME":       osBucketName,
+	// 	"OBJECT_STORAGE_REGION":            osRegion,
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// Email configuration
+	emailAPIKey, err := readSecret("resend_api_key", "RESEND_API_KEY_FILE")
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "load resend api key")
+	// }
+
+	emailDomain := os.Getenv("EMAIL_DOMAIN")
+	if emailDomain == "" {
+		emailDomain = os.Getenv("RESEND_DOMAIN")
 	}
-	
+	if emailDomain == "" {
+		emailDomain = "resend.dev"
+	}
+
+	// if err := validateRequiredConfig(map[string]string{
+	// 	"RESEND_API_KEY": emailAPIKey,
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
 	return &Config{
 		APP: APPConfig{
 			Port: Port,
@@ -130,6 +156,11 @@ func LoadConfig() (*Config, error) {
 			AccessKeyID:     osAccessKeyID,
 			SecretAccessKey: osSecretAccessKey,
 			BucketName:      osBucketName,
+			Region:          osRegion,	
+		},
+		Email: EmailConfig{
+			APIKey: emailAPIKey,
+			Domain: emailDomain,
 		},
 	}, nil
 }
@@ -160,6 +191,3 @@ func readSecret(valueName, fileName string) (string, error) {
 
 	return strings.TrimSpace(string(secret)), nil
 }
-
-
-

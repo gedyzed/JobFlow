@@ -1,3 +1,8 @@
+with-expecter: true
+resolve-type-alias: false
+disable-version-string: true
+issue-845-fix: true
+
 dir: "mocks/{{.PackageName}}"
 outpkg: "mocks"
 
@@ -7,5 +12,21 @@ packages:
       recursive: true
     interfaces:
        IJobRepo: {}
-       
+       IWorkerRepository: {}
+  
+  github.com/gedyzed/JobFlow/JobService/services/worker:
+    config:
+      recursive: true
+    interfaces:
+      IWorkerService: {}
+      ISendEmail: {}
+
+  github.com/gedyzed/JobFlow/JobService/models:
+    config:
+      recursive: true
+    interfaces:
+      IRMQClient: {}
+      IObjectStorage: {}
+      Consumer: {}
+
   

@@ -13,9 +13,12 @@ import (
 	"syscall"
 	"time"
 
+	"gorm.io/gorm"
+
 	infra "github.com/gedyzed/JobFlow/JobService/infra"
 	emailsender "github.com/gedyzed/JobFlow/JobService/infra/EmailSender"
 	configs "github.com/gedyzed/JobFlow/JobService/infra/configs"
+	"github.com/gedyzed/JobFlow/JobService/repositories"
 	"github.com/gedyzed/JobFlow/JobService/services/worker"
 
 	"github.com/joho/godotenv"
@@ -62,6 +65,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Setup graceful shutdown context
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+
+	var db *gorm.DB
+	if err := infra.Retry(ctx, "Database", 5, 5 * time.Second, func() (dbErr error) {
+		db, dbErr = infra.DBInit(cfg.DB)
+		return dbErr
+	}); err != nil {
+		slog.Error("Failed to initialize database connection after retries", "error", err, "error_detail", fmt.Sprintf("%+v", err))
+		os.Exit(1)
+	}
+
+	// initialize repositories
+	workerRepo := repositories.NewWorkerRepository(db, logger)
+
 	// Initialize RabbitMQ service and client with retries
 	rMqService := infra.NewRabbitMQService(cfg.RabbitMQ, logger)
 	rmqClient := infra.NewRMQClient(rMqService)
@@ -75,37 +95,12 @@ func main() {
 	emailSender := emailsender.NewEmailSender(cfg)
 
 	// worker service
-	workerService := worker.NewWorkerService(logger, rmqClient, emailSender, s3Client)
+	workerService := worker.NewWorkerService(workerRepo, logger, rmqClient, emailSender, s3Client)
 
-	// Setup graceful shutdown context
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
-	const maxRMQRetries = 15
-	var rmqErr error
-	for attempt := 1; attempt <= maxRMQRetries; attempt++ {
-		select {
-		case <-ctx.Done():
-			slog.Info("Shutdown received while waiting for RabbitMQ")
-			return
-		default:
-		}
-
-		rmqErr = rmqClient.Connect(ctx)
-		if rmqErr == nil {
-			break
-		}
-
-		slog.Warn("Waiting for RabbitMQ connection...", "attempt", attempt, "max_attempts", maxRMQRetries, "error", rmqErr)
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(2 * time.Second):
-		}
-	}
-
-	if rmqErr != nil {
-		slog.Error("Failed to connect to RabbitMQ after retries", "error", rmqErr, "error_detail", fmt.Sprintf("%+v", rmqErr))
+	if err := infra.Retry(ctx, "RabbitMQ", 5, 5 * time.Second, func() error {
+		return rmqClient.Connect(ctx)
+	}); err != nil {
+		slog.Error("Failed to connect to RabbitMQ after retries", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 	defer func() {
@@ -113,25 +108,6 @@ func main() {
 		defer cancel()
 		if err := rmqClient.Close(closeCtx); err != nil {
 			slog.Error("Failed to cleanly close RabbitMQ client", "error", err)
-		}
-	}()
-
-	// Create dedicated publisher for outbox relay
-	queueName := cfg.RabbitMQ.Name
-	if queueName == "" {
-		queueName = "job_queue"
-	}
-
-	consumer, err := rmqClient.NewConsumer(ctx, queueName)
-	if err != nil {
-		slog.Error("Failed to create RabbitMQ consumer", "error", err)
-		os.Exit(1)
-	}
-	defer func() {
-		closeCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := consumer.Close(closeCtx); err != nil {
-			slog.Error("Failed to cleanly close consumer", "error", err)
 		}
 	}()
 

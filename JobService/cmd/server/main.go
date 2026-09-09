@@ -1,13 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
+	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/gedyzed/JobFlow/JobService/controllers"
 	infra "github.com/gedyzed/JobFlow/JobService/infra"
@@ -52,10 +58,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize the database connection
-	db, err := infra.DBInit(configs.DB)
-	if err != nil {
-		slog.Error("Failed to initialize database connection", "error", err, "error_detail", fmt.Sprintf("%+v", err))
+	// Setup graceful shutdown context
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	// Initialize the database connection with retry
+	var db *gorm.DB
+	if err := infra.Retry(ctx, "Database", 5, 5 * time.Second, func() (dbErr error) {
+		db, dbErr = infra.DBInit(configs.DB)
+		return dbErr
+	}); err != nil {
+		slog.Error("Failed to initialize database connection after retries", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 

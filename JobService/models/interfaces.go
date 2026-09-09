@@ -40,4 +40,7 @@ type IObjectStorage interface {
 	GetObject(ctx context.Context, objectKey string) (io.Reader, error)
 	PutObject(ctx context.Context, objectKey string, data io.Reader, contentType *string) error
 	DeleteObject(ctx context.Context, objectKey string) error
+
 }
+
+

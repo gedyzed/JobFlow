@@ -105,5 +105,40 @@
       },
       "attempts": 0
     }
+  ],
+
+  "Objects": [
+    {
+      "object_key": "results/job-01a067a1-248e-779a-9fba-a101f0f2b920.json",
+      "content": {
+        "report": "Monthly Sales Report",
+        "data": [
+          {"item": "Product A", "sales": 1000},
+          {"item": "Product B", "sales": 1500}
+        ]
+      }
+    }
+  ],
+
+  "rabbitmq_messages": [
+    {
+      "queue": "job_queue",
+      "message": {
+        "job_id": "01a067a1-248e-779a-9fba-a101f0f2b918",
+        "user_id": "user_123",
+        "type": "SEND_EMAIL",
+        "status": "pending"
+      }
+    }
+  ],
+
+  "email_messages": [
+    {
+      "to": ["dan@example.com"],
+      "subject": "System Warning",
+      "body": "Action required on your account.",
+      "from": "alerts@example.com"
+    }
   ]
+
 }

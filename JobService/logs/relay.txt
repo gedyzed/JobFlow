@@ -282,3 +282,196 @@
 {"time":"2026-09-07T16:43:35.4036114+03:00","level":"INFO","msg":"consumer stopped: context canceled","queue":"job_queue"}
 {"time":"2026-09-07T16:43:35.4041547+03:00","level":"ERROR","msg":"failed to close consumer","queue":"job_queue","error":"context canceled"}
 {"time":"2026-09-07T16:43:35.4811179+03:00","level":"INFO","msg":"RabbitMQ client closed"}
+{"time":"2026-09-09T15:12:30.8085113+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"50aa176a-6971-4fb1-ba11-394dab042d14"}
+{"time":"2026-09-09T15:12:30.8236646+03:00","level":"DEBUG","msg":"Management interface opened","ID":"50aa176a-6971-4fb1-ba11-394dab042d14"}
+{"time":"2026-09-09T15:12:30.8595636+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:12:30.8607663+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T15:12:30.9317338+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:12:30.9317338+03:00","level":"INFO","msg":"Worker started"}
+{"time":"2026-09-09T15:12:30.9322502+03:00","level":"INFO","msg":"Fetching published jobs"}
+{"time":"2026-09-09T15:12:30.9452489+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:12:30.9452489+03:00","level":"INFO","msg":"Consumer listening on job_queue"}
+{"time":"2026-09-09T15:12:30.9452489+03:00","level":"INFO","msg":"consumer started, waiting for messages","queue":"job_queue"}
+{"time":"2026-09-09T15:13:36.3468014+03:00","level":"INFO","msg":"consumer stopped: context canceled","queue":"job_queue"}
+{"time":"2026-09-09T15:13:36.3473478+03:00","level":"ERROR","msg":"failed to close consumer","queue":"job_queue","error":"context canceled"}
+{"time":"2026-09-09T15:13:36.3610303+03:00","level":"INFO","msg":"RabbitMQ client closed"}
+{"time":"2026-09-09T15:14:27.7293344+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"0eba9392-acf7-4e59-8684-54e4ca952979"}
+{"time":"2026-09-09T15:14:27.7455604+03:00","level":"DEBUG","msg":"Management interface opened","ID":"0eba9392-acf7-4e59-8684-54e4ca952979"}
+{"time":"2026-09-09T15:14:27.7761123+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:14:27.7761123+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T15:14:27.7825189+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:14:34.6778128+03:00","level":"INFO","msg":"Worker started"}
+{"time":"2026-09-09T15:14:40.7417314+03:00","level":"INFO","msg":"Fetching published jobs"}
+{"time":"2026-09-09T15:14:41.3144961+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:14:44.1247953+03:00","level":"INFO","msg":"Consumer listening on job_queue"}
+{"time":"2026-09-09T15:14:44.5758137+03:00","level":"INFO","msg":"consumer started, waiting for messages","queue":"job_queue"}
+{"time":"2026-09-09T15:17:53.4707649+03:00","level":"INFO","msg":"Received job event","payload_size":1348}
+{"time":"2026-09-09T15:17:53.4718799+03:00","level":"INFO","msg":"Processing job","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:17:53.4900976+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:18:24.3363561+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:24:00.8277401+03:00","level":"ERROR","msg":"connection closed unexpectedly","error":"write tcp [::1]:62619->[::1]:5672: wsasend: An established connection was aborted by the software in your host machine.","ID":"0eba9392-acf7-4e59-8684-54e4ca952979_1"}
+{"time":"2026-09-09T15:24:00.8288137+03:00","level":"INFO","msg":"Attempting reconnection","attempt":1,"delay":5029000000,"ID":"0eba9392-acf7-4e59-8684-54e4ca952979_1"}
+{"time":"2026-09-09T15:24:00.8338539+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:24:00.8359855+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:24:00.8359855+03:00","level":"ERROR","msg":"failed to discard failed message","queue":"job_queue","error":"write tcp [::1]:62619->[::1]:5672: wsasend: An established connection was aborted by the software in your host machine."}
+{"time":"2026-09-09T15:24:00.8365097+03:00","level":"ERROR","msg":"failed to receive message","queue":"job_queue","error":"write tcp [::1]:62619->[::1]:5672: wsasend: An established connection was aborted by the software in your host machine."}
+{"time":"2026-09-09T15:24:00.8365097+03:00","level":"ERROR","msg":"failed to close consumer","queue":"job_queue","error":"write tcp [::1]:62619->[::1]:5672: wsasend: An established connection was aborted by the software in your host machine."}
+{"time":"2026-09-09T15:24:00.8365097+03:00","level":"ERROR","msg":"Failed to start worker","error":"failed to receive message: write tcp [::1]:62619->[::1]:5672: wsasend: An established connection was aborted by the software in your host machine.","error_detail":"failed to receive message: write tcp [::1]:62619->[::1]:5672: wsasend: An established connection was aborted by the software in your host machine.\n(1) attached stack trace\n  -- stack trace:\n  | github.com/gedyzed/JobFlow/JobService/infra.(*RMQConsumer).Consume\n  | \tC:/Users/All in one/Desktop/Practice/JobFlow/JobService/infra/rabbitmq.go:83\n  | github.com/gedyzed/JobFlow/JobService/services/worker.(*WorkerService).ConsumeJobs\n  | \tC:/Users/All in one/Desktop/Practice/JobFlow/JobService/services/worker/worker_service.go:62\n  | github.com/gedyzed/JobFlow/JobService/services/worker.(*WorkerService).StartWorker\n  | \tC:/Users/All in one/Desktop/Practice/JobFlow/JobService/services/worker/worker_service.go:44\n  | main.main\n  | \tC:/Users/All in one/Desktop/Practice/JobFlow/JobService/cmd/worker/main.go:172\n  | runtime.main\n  | \tC:/Program Files/Go/src/runtime/proc.go:285\n  | runtime.goexit\n  | \tC:/Program Files/Go/src/runtime/asm_amd64.s:1693\nWraps: (2) failed to receive message\nWraps: (3) write tcp [::1]:62619->[::1]:5672: wsasend: An established connection was aborted by the software in your host machine.\nError types: (1) *withstack.withStack (2) *errutil.withPrefix (3) *amqp.ConnError"}
+{"time":"2026-09-09T15:24:40.9355332+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"95132d0a-0e2a-49b7-9075-5c4d47a9eb02"}
+{"time":"2026-09-09T15:24:40.9549796+03:00","level":"DEBUG","msg":"Management interface opened","ID":"95132d0a-0e2a-49b7-9075-5c4d47a9eb02"}
+{"time":"2026-09-09T15:24:40.9861082+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:24:40.9861082+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T15:24:40.9924562+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:24:47.0155635+03:00","level":"INFO","msg":"Worker started"}
+{"time":"2026-09-09T15:24:47.6860833+03:00","level":"INFO","msg":"Fetching published jobs"}
+{"time":"2026-09-09T15:24:47.6930851+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:24:47.6930851+03:00","level":"INFO","msg":"Consumer listening on job_queue"}
+{"time":"2026-09-09T15:24:47.6930851+03:00","level":"INFO","msg":"consumer started, waiting for messages","queue":"job_queue"}
+{"time":"2026-09-09T15:25:35.4994906+03:00","level":"INFO","msg":"Received job event","payload_size":1380}
+{"time":"2026-09-09T15:25:35.4994906+03:00","level":"INFO","msg":"Processing job","job_id":"01a08621-75c8-76ec-b0dd-3c62de4d75b3","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:25:35.5204832+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08621-75c8-76ec-b0dd-3c62de4d75b3","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:25:52.7103786+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a08621-75c8-76ec-b0dd-3c62de4d75b3"}
+{"time":"2026-09-09T15:25:55.2602986+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08621-75c8-76ec-b0dd-3c62de4d75b3","status":"completed","rows_affected":1}
+{"time":"2026-09-09T15:26:01.1268024+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a08621-75c8-76ec-b0dd-3c62de4d75b3","error":"query job result for job 01a08621-75c8-76ec-b0dd-3c62de4d75b3: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
+{"time":"2026-09-09T15:30:04.1085146+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"152a5fa8-4c10-4328-bd63-e61dcbd4d769"}
+{"time":"2026-09-09T15:30:04.1264603+03:00","level":"DEBUG","msg":"Management interface opened","ID":"152a5fa8-4c10-4328-bd63-e61dcbd4d769"}
+{"time":"2026-09-09T15:30:04.1613149+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:30:04.1613149+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T15:30:10.5949906+03:00","level":"INFO","msg":"Worker started"}
+{"time":"2026-09-09T15:30:10.5949906+03:00","level":"INFO","msg":"Fetching published jobs"}
+{"time":"2026-09-09T15:30:10.6017481+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:30:10.6017481+03:00","level":"INFO","msg":"Consumer listening on job_queue"}
+{"time":"2026-09-09T15:30:10.6017481+03:00","level":"INFO","msg":"consumer started, waiting for messages","queue":"job_queue"}
+{"time":"2026-09-09T15:30:10.6110314+03:00","level":"INFO","msg":"Received job event","payload_size":447}
+{"time":"2026-09-09T15:30:10.6122181+03:00","level":"INFO","msg":"Processing job","job_id":"01a0679e-ea26-7d72-9d6f-f26e69bfcd61","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:30:10.627636+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0679e-ea26-7d72-9d6f-f26e69bfcd61","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:30:16.0338352+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a0679e-ea26-7d72-9d6f-f26e69bfcd61","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:30:16.0418539+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0679e-ea26-7d72-9d6f-f26e69bfcd61","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:30:16.0433026+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:30:16.0438574+03:00","level":"INFO","msg":"Received job event","payload_size":447}
+{"time":"2026-09-09T15:30:16.0438574+03:00","level":"INFO","msg":"Processing job","job_id":"01a067a1-248e-779a-9fba-a101f0f2b918","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:30:16.0488125+03:00","level":"INFO","msg":"Updated job status","job_id":"01a067a1-248e-779a-9fba-a101f0f2b918","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:30:18.7270132+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a067a1-248e-779a-9fba-a101f0f2b918","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:30:18.7330824+03:00","level":"INFO","msg":"Updated job status","job_id":"01a067a1-248e-779a-9fba-a101f0f2b918","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:30:18.7350088+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:30:18.7350088+03:00","level":"INFO","msg":"Received job event","payload_size":441}
+{"time":"2026-09-09T15:30:18.7350088+03:00","level":"INFO","msg":"Processing job","job_id":"01a070cd-948d-7497-b581-abe015097136","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:30:18.7398828+03:00","level":"INFO","msg":"Updated job status","job_id":"01a070cd-948d-7497-b581-abe015097136","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:30:41.1638099+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a070cd-948d-7497-b581-abe015097136","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:30:41.878734+03:00","level":"INFO","msg":"Updated job status","job_id":"01a070cd-948d-7497-b581-abe015097136","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:30:47.8247281+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:30:54.4660614+03:00","level":"INFO","msg":"Received job event","payload_size":441}
+{"time":"2026-09-09T15:30:54.4666425+03:00","level":"INFO","msg":"Processing job","job_id":"01a070ce-38c6-78f6-a738-2cde403fadee","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:30:54.4746804+03:00","level":"INFO","msg":"Updated job status","job_id":"01a070ce-38c6-78f6-a738-2cde403fadee","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:30:58.473521+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a070ce-38c6-78f6-a738-2cde403fadee","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:30:58.8985159+03:00","level":"INFO","msg":"Updated job status","job_id":"01a070ce-38c6-78f6-a738-2cde403fadee","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:31:03.9805675+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."}
+{"time":"2026-09-09T15:31:10.6439573+03:00","level":"INFO","msg":"Received job event","payload_size":4}
+{"time":"2026-09-09T15:31:10.6439573+03:00","level":"ERROR","msg":"Failed to unmarshal job event","error":"invalid character 'o' in literal null (expecting 'u')"}
+{"time":"2026-09-09T15:31:11.0079247+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"unmarshal job event: invalid character 'o' in literal null (expecting 'u')"}
+{"time":"2026-09-09T15:31:14.2572201+03:00","level":"INFO","msg":"Received job event","payload_size":1349}
+{"time":"2026-09-09T15:31:14.2577565+03:00","level":"INFO","msg":"Processing job","job_id":"01a08608-4ddc-7a56-9e3a-f933507e79eb","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:14.2641962+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08608-4ddc-7a56-9e3a-f933507e79eb","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:18.1508438+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a08608-4ddc-7a56-9e3a-f933507e79eb","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:18.4566886+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08608-4ddc-7a56-9e3a-f933507e79eb","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:31:21.3338049+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:25.2655411+03:00","level":"INFO","msg":"Received job event","payload_size":1349}
+{"time":"2026-09-09T15:31:25.2661301+03:00","level":"INFO","msg":"Processing job","job_id":"01a08613-9359-77b9-9950-e21e3063b3b6","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:25.2710413+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08613-9359-77b9-9950-e21e3063b3b6","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:26.8105952+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a08613-9359-77b9-9950-e21e3063b3b6","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:27.3194123+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08613-9359-77b9-9950-e21e3063b3b6","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:31:27.4872976+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:30.2640705+03:00","level":"INFO","msg":"Received job event","payload_size":1349}
+{"time":"2026-09-09T15:31:30.2645881+03:00","level":"INFO","msg":"Processing job","job_id":"01a08616-60a6-7bd7-8220-6d527eca6ee6","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:30.3344218+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08616-60a6-7bd7-8220-6d527eca6ee6","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:31.5280335+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a08616-60a6-7bd7-8220-6d527eca6ee6","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:32.9162913+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08616-60a6-7bd7-8220-6d527eca6ee6","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:31:32.9182229+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:32.9182229+03:00","level":"INFO","msg":"Received job event","payload_size":1350}
+{"time":"2026-09-09T15:31:32.9182229+03:00","level":"INFO","msg":"Processing job","job_id":"01a08617-b82f-794c-a6f0-e659ee77f7ff","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:32.923056+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08617-b82f-794c-a6f0-e659ee77f7ff","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:34.2039162+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a08617-b82f-794c-a6f0-e659ee77f7ff","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:34.2102226+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08617-b82f-794c-a6f0-e659ee77f7ff","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:31:34.213093+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:34.213093+03:00","level":"INFO","msg":"Received job event","payload_size":1348}
+{"time":"2026-09-09T15:31:34.213093+03:00","level":"INFO","msg":"Processing job","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:34.2175395+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:35.0457293+03:00","level":"ERROR","msg":"Failed to send email","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:35.0525653+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0861a-6986-7144-a008-1f54f88e2d8a","status":"failed","rows_affected":1}
+{"time":"2026-09-09T15:31:35.0540194+03:00","level":"ERROR","msg":"handler failed to process message","queue":"job_queue","error":"send email via resend: [ERROR]: The gmail.com domain is not verified. Please, add and verify your domain on https://resend.com/domains"}
+{"time":"2026-09-09T15:31:35.0545563+03:00","level":"INFO","msg":"Received job event","payload_size":1380}
+{"time":"2026-09-09T15:31:35.0545563+03:00","level":"INFO","msg":"Processing job","job_id":"01a0861f-e33e-724e-8396-0a2861ced52f","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:35.060001+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0861f-e33e-724e-8396-0a2861ced52f","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:36.5324525+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a0861f-e33e-724e-8396-0a2861ced52f"}
+{"time":"2026-09-09T15:31:36.5429592+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0861f-e33e-724e-8396-0a2861ced52f","status":"completed","rows_affected":1}
+{"time":"2026-09-09T15:31:36.5441172+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a0861f-e33e-724e-8396-0a2861ced52f","error":"query job result for job 01a0861f-e33e-724e-8396-0a2861ced52f: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
+{"time":"2026-09-09T15:31:36.5441172+03:00","level":"INFO","msg":"Received job event","payload_size":1378}
+{"time":"2026-09-09T15:31:36.5441172+03:00","level":"INFO","msg":"Processing job","job_id":"01a08620-aa63-799c-be18-bec1ef067457","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:36.5489783+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08620-aa63-799c-be18-bec1ef067457","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:37.6945739+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a08620-aa63-799c-be18-bec1ef067457"}
+{"time":"2026-09-09T15:31:37.6993279+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08620-aa63-799c-be18-bec1ef067457","status":"completed","rows_affected":1}
+{"time":"2026-09-09T15:31:37.7018885+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a08620-aa63-799c-be18-bec1ef067457","error":"query job result for job 01a08620-aa63-799c-be18-bec1ef067457: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
+{"time":"2026-09-09T15:31:37.7018885+03:00","level":"INFO","msg":"Received job event","payload_size":1380}
+{"time":"2026-09-09T15:31:37.7018885+03:00","level":"INFO","msg":"Processing job","job_id":"01a08621-15a1-712c-a600-43f7b850c254","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:37.7068144+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08621-15a1-712c-a600-43f7b850c254","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:31:38.6390048+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a08621-15a1-712c-a600-43f7b850c254"}
+{"time":"2026-09-09T15:31:38.644098+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08621-15a1-712c-a600-43f7b850c254","status":"completed","rows_affected":1}
+{"time":"2026-09-09T15:31:38.6465098+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a08621-15a1-712c-a600-43f7b850c254","error":"query job result for job 01a08621-15a1-712c-a600-43f7b850c254: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
+{"time":"2026-09-09T15:31:55.4036043+03:00","level":"INFO","msg":"Received job event","payload_size":1380}
+{"time":"2026-09-09T15:31:55.4041645+03:00","level":"INFO","msg":"Processing job","job_id":"01a08627-42d9-7a4b-8425-1f55066afad9","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:31:55.4141496+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08627-42d9-7a4b-8425-1f55066afad9","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:32:03.4101308+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a08627-42d9-7a4b-8425-1f55066afad9"}
+{"time":"2026-09-09T15:32:03.9427205+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08627-42d9-7a4b-8425-1f55066afad9","status":"completed","rows_affected":1}
+{"time":"2026-09-09T15:32:05.9523104+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a08627-42d9-7a4b-8425-1f55066afad9","error":"query job result for job 01a08627-42d9-7a4b-8425-1f55066afad9: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
+{"time":"2026-09-09T15:37:01.7271892+03:00","level":"INFO","msg":"Received job event","payload_size":1438}
+{"time":"2026-09-09T15:37:01.7271892+03:00","level":"INFO","msg":"Processing job","job_id":"01a0862b-b7da-7087-b81c-0ea4b04f7c90","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:37:01.8000732+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0862b-b7da-7087-b81c-0ea4b04f7c90","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:37:06.6754705+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a0862b-b7da-7087-b81c-0ea4b04f7c90"}
+{"time":"2026-09-09T15:37:07.0438227+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0862b-b7da-7087-b81c-0ea4b04f7c90","status":"completed","rows_affected":1}
+{"time":"2026-09-09T15:37:07.4792808+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a0862b-b7da-7087-b81c-0ea4b04f7c90","error":"query job result for job 01a0862b-b7da-7087-b81c-0ea4b04f7c90: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
+{"time":"2026-09-09T15:51:41.4462726+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"0f06e17b-46c6-443d-a98d-7c3741d6e1a5"}
+{"time":"2026-09-09T15:51:41.4637198+03:00","level":"DEBUG","msg":"Management interface opened","ID":"0f06e17b-46c6-443d-a98d-7c3741d6e1a5"}
+{"time":"2026-09-09T15:51:41.4993903+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:51:41.4993903+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T15:52:43.7391541+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"c3fcf37e-2a15-40ca-817e-b1185d26b9b0"}
+{"time":"2026-09-09T15:52:43.7551491+03:00","level":"DEBUG","msg":"Management interface opened","ID":"c3fcf37e-2a15-40ca-817e-b1185d26b9b0"}
+{"time":"2026-09-09T15:52:43.7879578+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:52:43.7879578+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T15:52:49.0851543+03:00","level":"INFO","msg":"Worker started"}
+{"time":"2026-09-09T15:52:49.0852133+03:00","level":"INFO","msg":"Fetching published jobs"}
+{"time":"2026-09-09T15:52:49.0929175+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T15:52:49.0929175+03:00","level":"INFO","msg":"Consumer listening on job_queue"}
+{"time":"2026-09-09T15:52:49.0929175+03:00","level":"INFO","msg":"consumer started, waiting for messages","queue":"job_queue"}
+{"time":"2026-09-09T15:52:49.0991355+03:00","level":"INFO","msg":"Received job event","payload_size":1420}
+{"time":"2026-09-09T15:52:49.1004046+03:00","level":"INFO","msg":"Processing job","job_id":"01a08639-a57b-752a-9219-a02952cf67b9","type":"SEND_EMAIL"}
+{"time":"2026-09-09T15:52:49.1191128+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08639-a57b-752a-9219-a02952cf67b9","status":"running","rows_affected":1}
+{"time":"2026-09-09T15:53:02.1681065+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a08639-a57b-752a-9219-a02952cf67b9"}
+{"time":"2026-09-09T15:53:02.6035528+03:00","level":"INFO","msg":"Updated job status","job_id":"01a08639-a57b-752a-9219-a02952cf67b9","status":"completed","rows_affected":1}
+{"time":"2026-09-09T15:53:03.7938092+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a08639-a57b-752a-9219-a02952cf67b9","error":"query job result for job 01a08639-a57b-752a-9219-a02952cf67b9: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
+{"time":"2026-09-09T16:11:54.9888625+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"30a2e26d-163b-4022-8d7c-b7d5d82e48ea"}
+{"time":"2026-09-09T16:11:55.0035471+03:00","level":"DEBUG","msg":"Management interface opened","ID":"30a2e26d-163b-4022-8d7c-b7d5d82e48ea"}
+{"time":"2026-09-09T16:11:55.037146+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T16:11:55.0377053+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T16:11:55.0377053+03:00","level":"INFO","msg":"Worker started"}
+{"time":"2026-09-09T16:11:55.0382349+03:00","level":"INFO","msg":"Fetching published jobs"}
+{"time":"2026-09-09T16:11:55.1090657+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T16:11:55.1090657+03:00","level":"INFO","msg":"Consumer listening on job_queue"}
+{"time":"2026-09-09T16:11:55.1090657+03:00","level":"INFO","msg":"consumer started, waiting for messages","queue":"job_queue"}
+{"time":"2026-09-09T16:11:58.6921483+03:00","level":"INFO","msg":"consumer stopped: context canceled","queue":"job_queue"}
+{"time":"2026-09-09T16:11:58.6921483+03:00","level":"ERROR","msg":"failed to close consumer","queue":"job_queue","error":"context canceled"}
+{"time":"2026-09-09T16:11:58.6976015+03:00","level":"INFO","msg":"RabbitMQ client closed"}
+{"time":"2026-09-09T16:12:18.454814+03:00","level":"DEBUG","msg":"Connected to","amqp://jobflow@*****localhost:5672/":"ID","!BADKEY":"ac5504e4-93b0-4ca6-a8a2-67f436da6db8"}
+{"time":"2026-09-09T16:12:18.4703101+03:00","level":"DEBUG","msg":"Management interface opened","ID":"ac5504e4-93b0-4ca6-a8a2-67f436da6db8"}
+{"time":"2026-09-09T16:12:18.5041443+03:00","level":"INFO","msg":"queue declared successfully","queue":"job_queue"}
+{"time":"2026-09-09T16:12:18.5041443+03:00","level":"INFO","msg":"RabbitMQ connection established"}
+{"time":"2026-09-09T16:12:18.5041443+03:00","level":"INFO","msg":"Worker started"}
+{"time":"2026-09-09T16:12:18.5041443+03:00","level":"INFO","msg":"Fetching published jobs"}
+{"time":"2026-09-09T16:12:18.576143+03:00","level":"INFO","msg":"consumer created successfully","queue":"job_queue"}
+{"time":"2026-09-09T16:12:18.576143+03:00","level":"INFO","msg":"Consumer listening on job_queue"}
+{"time":"2026-09-09T16:12:18.576143+03:00","level":"INFO","msg":"consumer started, waiting for messages","queue":"job_queue"}
+{"time":"2026-09-09T16:12:49.224048+03:00","level":"INFO","msg":"Received job event","payload_size":1424}
+{"time":"2026-09-09T16:12:49.2251159+03:00","level":"INFO","msg":"Processing job","job_id":"01a0864c-aefb-72ee-91fe-f8b2c9b9ed9f","type":"SEND_EMAIL"}
+{"time":"2026-09-09T16:12:49.2433734+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0864c-aefb-72ee-91fe-f8b2c9b9ed9f","status":"running","rows_affected":1}
+{"time":"2026-09-09T16:12:55.8656695+03:00","level":"INFO","msg":"Email sent successfully","job_id":"01a0864c-aefb-72ee-91fe-f8b2c9b9ed9f"}
+{"time":"2026-09-09T16:12:55.8747867+03:00","level":"INFO","msg":"Updated job status","job_id":"01a0864c-aefb-72ee-91fe-f8b2c9b9ed9f","status":"completed","rows_affected":1}
+{"time":"2026-09-09T16:12:55.8763631+03:00","level":"WARN","msg":"Failed to save job result","job_id":"01a0864c-aefb-72ee-91fe-f8b2c9b9ed9f","error":"query job result for job 01a0864c-aefb-72ee-91fe-f8b2c9b9ed9f: ERROR: relation \"job_results\" does not exist (SQLSTATE 42P01)"}
