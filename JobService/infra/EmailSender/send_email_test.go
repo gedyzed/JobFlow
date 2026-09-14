@@ -42,12 +42,10 @@ func (m *mockResendClient) SendBatch(ctx context.Context, batch []*resend.SendEm
 
 func TestSendEmail_SingleEmailWithDefaultTemplate(t *testing.T) {
 	mockClient := &mockResendClient{}
-	cfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-		},
+	cfg := configs.EmailConfig{
+		APIKey: "re_test_key",
 	}
-	sender := NewEmailSenderWithClient(cfg, mockClient)
+	sender := NewEmailSenderWithClient(&cfg, mockClient)
 
 	payload := workerModels.SendEmailPayload{
 		From:    "Acme <onboarding@resend.dev>",
@@ -80,12 +78,10 @@ func TestSendEmail_SingleEmailWithDefaultTemplate(t *testing.T) {
 
 func TestSendEmail_SingleEmailWithCustomHTML(t *testing.T) {
 	mockClient := &mockResendClient{}
-	cfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-		},
+	cfg := configs.EmailConfig{
+		APIKey: "re_test_key",
 	}
-	sender := NewEmailSenderWithClient(cfg, mockClient)
+	sender := NewEmailSenderWithClient(&cfg, mockClient)
 
 	payload := &workerModels.SendEmailPayload{
 		From:    "Acme <onboarding@resend.dev>",
@@ -110,13 +106,11 @@ func TestSendEmail_SingleEmailWithCustomHTML(t *testing.T) {
 
 func TestSendEmail_AppNameFormatting(t *testing.T) {
 	mockClient := &mockResendClient{}
-	cfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-			Domain: "resend.dev",
-		},
+	cfg := configs.EmailConfig{
+		APIKey: "re_test_key",
+		Domain: "resend.dev",
 	}
-	sender := NewEmailSenderWithClient(cfg, mockClient)
+	sender := NewEmailSenderWithClient(&cfg, mockClient)
 
 	// Test case 1: AppName provided without From -> appName@domain
 	payload1 := workerModels.SendEmailPayload{
@@ -143,13 +137,11 @@ func TestSendEmail_AppNameFormatting(t *testing.T) {
 	assert.Contains(t, mockClient.sentRequests[1].Html, "Sent securely via Job Flow")
 
 	// Test case 3: Custom domain from config -> appName@customdomain
-	customCfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-			Domain: "customdomain.com",
-		},
+	customCfg := configs.EmailConfig{
+		APIKey: "re_test_key",
+		Domain: "customdomain.com",
 	}
-	customSender := NewEmailSenderWithClient(customCfg, mockClient)
+	customSender := NewEmailSenderWithClient(&customCfg, mockClient)
 	payload3 := workerModels.SendEmailPayload{
 		AppName: "AcmeApp",
 		To:      []string{"user@example.com"},
@@ -175,12 +167,10 @@ func TestSendEmail_AppNameFormatting(t *testing.T) {
 
 func TestSendEmail_BatchEmails_Chunking(t *testing.T) {
 	mockClient := &mockResendClient{}
-	cfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-		},
+	cfg := configs.EmailConfig{
+		APIKey: "re_test_key",
 	}
-	sender := NewEmailSenderWithClient(cfg, mockClient)
+	sender := NewEmailSenderWithClient(&cfg, mockClient)
 
 	// Create 150 emails to test chunking at 100 limit
 	var batch []workerModels.SendEmailPayload
@@ -206,12 +196,10 @@ func TestSendEmail_BatchEmails_Chunking(t *testing.T) {
 
 func TestSendEmail_JSONPayloadParsing(t *testing.T) {
 	mockClient := &mockResendClient{}
-	cfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-		},
+	cfg := configs.EmailConfig{
+		APIKey: "re_test_key",
 	}
-	sender := NewEmailSenderWithClient(cfg, mockClient)
+	sender := NewEmailSenderWithClient(&cfg, mockClient)
 
 	// Test JSON bytes for single email
 	jsonBytes := []byte(`{
@@ -250,12 +238,10 @@ func TestSendEmail_JSONPayloadParsing(t *testing.T) {
 
 func TestSendEmail_ValidationErrors(t *testing.T) {
 	mockClient := &mockResendClient{}
-	cfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-		},
+	cfg := configs.EmailConfig{
+		APIKey: "re_test_key",
 	}
-	sender := NewEmailSenderWithClient(cfg, mockClient)
+	sender := NewEmailSenderWithClient(&cfg, mockClient)
 
 	// Nil payload
 	assert.Error(t, sender.SendEmail(context.Background(), nil))
@@ -295,12 +281,10 @@ func TestSendEmail_ClientError(t *testing.T) {
 			return nil, errors.New("resend api rate limit")
 		},
 	}
-	cfg := &configs.Config{
-		Email: configs.EmailConfig{
-			APIKey: "re_test_key",
-		},
+	cfg := configs.EmailConfig{
+		APIKey: "re_test_key",
 	}
-	sender := NewEmailSenderWithClient(cfg, mockClient)
+	sender := NewEmailSenderWithClient(&cfg, mockClient)
 
 	err := sender.SendEmail(context.Background(), workerModels.SendEmailPayload{
 		From:    "from@example.com",

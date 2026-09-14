@@ -26,15 +26,15 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("Note: .env file not found or could not be loaded")
+		slog.Info("Note: .env file not found or could not be loaded")
 	}
 
 	logDir := "logs"
 	if mkErr := os.MkdirAll(logDir, 0o755); mkErr != nil {
-		log.Fatalf("failed to create log directory: %v", mkErr)
+		slog.Error("failed to create log directory: %v", mkErr)
 	}
 
-	logPath := filepath.Join(logDir, "relay.txt")
+	logPath := filepath.Join(logDir, "worker.txt")
 	logFile, fileErr := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if fileErr != nil {
 		log.Fatalf("failed to open log file %s: %v", logPath, fileErr)
@@ -69,9 +69,8 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-
 	var db *gorm.DB
-	if err := infra.Retry(ctx, "Database", 5, 5 * time.Second, func() (dbErr error) {
+	if err := infra.Retry(ctx, "Database", 5, 5*time.Second, func() (dbErr error) {
 		db, dbErr = infra.DBInit(cfg.DB)
 		return dbErr
 	}); err != nil {
@@ -92,12 +91,12 @@ func main() {
 	}
 
 	// email sender
-	emailSender := emailsender.NewEmailSender(cfg)
+	emailSender := emailsender.NewEmailSender(&cfg.Email)
 
 	// worker service
 	workerService := worker.NewWorkerService(workerRepo, logger, rmqClient, emailSender, s3Client)
 
-	if err := infra.Retry(ctx, "RabbitMQ", 5, 5 * time.Second, func() error {
+	if err := infra.Retry(ctx, "RabbitMQ", 5, 5*time.Second, func() error {
 		return rmqClient.Connect(ctx)
 	}); err != nil {
 		slog.Error("Failed to connect to RabbitMQ after retries", "error", err, "error_detail", fmt.Sprintf("%+v", err))

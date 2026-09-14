@@ -84,9 +84,10 @@ services:
       RESEND_API_KEY_FILE: /run/secrets/resend_api_key
       DEBUG: ${DEBUG:-true}
     volumes:
-      - ./secrets/db_password.txt:/run/secrets/db_password:ro
+      - ./secrets/resend_api_key.txt:/run/secrets/resend_api_key:ro
     secrets:
       - db_password
+      - resend_api_key
     depends_on:
       postgres:
           condition: service_healthy
@@ -142,6 +143,8 @@ services:
 secrets:
   db_password:
     file: ./secrets/db_password.txt
+  resend_api_key:
+    file: ./secrets/resend_api_key.txt
 
 volumes:
   postgres_data:

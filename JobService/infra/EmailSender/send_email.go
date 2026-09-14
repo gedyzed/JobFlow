@@ -70,12 +70,12 @@ func (c *defaultResendClient) SendBatch(ctx context.Context, batch []*resend.Sen
 }
 
 type EmailSender struct {
-	Config *configs.Config
+	Config *configs.EmailConfig
 	client ResendClient
 }
 
-func NewEmailSender(cfg *configs.Config) worker.ISendEmail {
-	client := resend.NewClient(cfg.Email.APIKey)
+func NewEmailSender(cfg *configs.EmailConfig) worker.ISendEmail {
+	client := resend.NewClient(cfg.APIKey)
 	return &EmailSender{
 		Config: cfg,
 		client: &defaultResendClient{client: client},
@@ -83,7 +83,7 @@ func NewEmailSender(cfg *configs.Config) worker.ISendEmail {
 }
 
 // NewEmailSenderWithClient allows injecting a custom or mock ResendClient.
-func NewEmailSenderWithClient(cfg *configs.Config, client ResendClient) worker.ISendEmail {
+func NewEmailSenderWithClient(cfg *configs.EmailConfig, client ResendClient) worker.ISendEmail {
 	return &EmailSender{
 		Config: cfg,
 		client: client,
@@ -152,8 +152,8 @@ func (e *EmailSender) sendBatch(ctx context.Context, batch []workerModels.SendEm
 
 func (e *EmailSender) buildSendEmailRequest(p *workerModels.SendEmailPayload) (*resend.SendEmailRequest, error) {
 	domain := "resend.dev"
-	if e.Config != nil && strings.TrimSpace(e.Config.Email.Domain) != "" {
-		domain = strings.TrimPrefix(strings.TrimSpace(e.Config.Email.Domain), "@")
+	if strings.TrimSpace(e.Config.Domain) != "" {
+		domain = strings.TrimPrefix(strings.TrimSpace(e.Config.Domain), "@")
 	}
 
 	if strings.TrimSpace(p.AppName) != "" {

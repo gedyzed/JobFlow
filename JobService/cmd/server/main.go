@@ -52,7 +52,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	// Load configuration
-	configs, err := configs.LoadConfig()
+	configs, err := configs.LoadJobServiceConfig()
 	if err != nil {
 		slog.Error("Failed to load configuration", "error", err, "error_detail", fmt.Sprintf("%+v", err))
 		os.Exit(1)
