@@ -82,6 +82,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-jobflow}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-jobflow}
       RESEND_API_KEY_FILE: /run/secrets/resend_api_key
+      EMAIL_DOMAIN: ${EMAIL_DOMAIN:-example.com}
       DEBUG: ${DEBUG:-true}
     volumes:
       - ./secrets/resend_api_key.txt:/run/secrets/resend_api_key:ro
@@ -138,7 +139,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-
 
 secrets:
   db_password:
