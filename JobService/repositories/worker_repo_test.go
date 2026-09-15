@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"io"
 	"log/slog"
 	"regexp"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gedyzed/JobFlow/JobService/models"
+	workerModels "github.com/gedyzed/JobFlow/JobService/models/worker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/postgres"
@@ -43,7 +45,13 @@ func TestWorkerRepository_SaveJobResult_NewRecord(t *testing.T) {
 
 	repo := NewWorkerRepository(gormDB, newTestLogger())
 	jobID := "job-123"
-	resultData := "test output result"
+	result := workerModels.JobResult{
+		JobID:      jobID,
+		UserID:     "user-1",
+		JobType:    "SEND_EMAIL",
+		ResultData: json.RawMessage(`{"status": "email_sent"}`),
+		Status:     models.StatusCompleted,
+	}
 
 	// 1. SELECT query finds no existing record
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "job_results" WHERE job_id = $1 AND "job_results"."deleted_at" IS NULL ORDER BY "job_results"."id" LIMIT $2`)).
@@ -56,7 +64,7 @@ func TestWorkerRepository_SaveJobResult_NewRecord(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	mock.ExpectCommit()
 
-	err := repo.SaveJobResult(context.Background(), jobID, resultData)
+	err := repo.SaveJobResult(context.Background(), jobID, result)
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
@@ -67,7 +75,13 @@ func TestWorkerRepository_SaveJobResult_ExistingRecord(t *testing.T) {
 
 	repo := NewWorkerRepository(gormDB, newTestLogger())
 	jobID := "job-123"
-	resultData := "updated output result"
+	result := workerModels.JobResult{
+		JobID:      jobID,
+		UserID:     "user-1",
+		JobType:    "SEND_EMAIL",
+		ResultData: json.RawMessage(`{"status": "updated"}`),
+		Status:     models.StatusCompleted,
+	}
 
 	// 1. SELECT query finds existing record
 	columns := []string{"id", "result_id", "job_id", "status", "result_data", "created_at", "updated_at", "deleted_at"}
@@ -84,7 +98,7 @@ func TestWorkerRepository_SaveJobResult_ExistingRecord(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
-	err := repo.SaveJobResult(context.Background(), jobID, resultData)
+	err := repo.SaveJobResult(context.Background(), jobID, result)
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

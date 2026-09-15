@@ -44,8 +44,8 @@ services:
       DB_PASSWORD_FILE: /run/secrets/db_password
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
-      RABBITMQ_USER: ${RABBITMQ_USER:-jobflow}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-jobflow}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       RABBITMQ_QUEUE_NAME: ${RABBITMQ_QUEUE_NAME:-job_queue}
       DEBUG: ${DEBUG:-true}
     volumes:
@@ -79,8 +79,8 @@ services:
       DB_PASSWORD_FILE: /run/secrets/db_password
       RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
-      RABBITMQ_USER: ${RABBITMQ_USER:-jobflow}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-jobflow}
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       RESEND_API_KEY_FILE: /run/secrets/resend_api_key
       EMAIL_DOMAIN: ${EMAIL_DOMAIN:-example.com}
       DEBUG: ${DEBUG:-true}
@@ -128,8 +128,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-jobflow}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-jobflow}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
       RABBITMQ_PLUGINS: rabbitmq_amqp1_0
     networks:
       - job-network

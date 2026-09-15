@@ -12,7 +12,7 @@ import (
 )
 
 type IWorkerRepository interface {
-	SaveJobResult(ctx context.Context, jobID string, result string) error
+	SaveJobResult(ctx context.Context, jobID string, result workerModels.JobResult) error
 	GetJobResult(ctx context.Context, jobID string) (string, error)
 	DeleteJobResult(ctx context.Context, jobID string) error
 	UpdateJobStatus(ctx context.Context, jobID string, status string) error
@@ -30,14 +30,17 @@ func NewWorkerRepository(db *gorm.DB, logger *slog.Logger) IWorkerRepository {
 	}
 }
 
-func (r *WorkerRepository) SaveJobResult(ctx context.Context, jobID string, result string) error {
+func (r *WorkerRepository) SaveJobResult(ctx context.Context, jobID string, result workerModels.JobResult) error {
 	var existing workerModels.JobResult
 	err := r.db.WithContext(ctx).Where("job_id = ?", jobID).First(&existing).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			jobResult := &workerModels.JobResult{
 				JobID:      jobID,
-				ResultData: []byte(result),
+				UserID:     result.UserID,
+				JobType:    result.JobType,
+				ResultKey:  result.ResultKey,
+				ResultData: result.ResultData,
 				Status:     models.StatusCompleted,
 			}
 			if err := r.db.WithContext(ctx).Create(jobResult).Error; err != nil {
@@ -49,7 +52,7 @@ func (r *WorkerRepository) SaveJobResult(ctx context.Context, jobID string, resu
 		return errors.Wrapf(err, "query job result for job %s", jobID)
 	}
 
-	existing.ResultData = []byte(result)
+	existing.ResultData = result.ResultData
 	existing.Status = models.StatusCompleted
 	if err := r.db.WithContext(ctx).Save(&existing).Error; err != nil {
 		return errors.Wrapf(err, "update existing job result for job %s", jobID)

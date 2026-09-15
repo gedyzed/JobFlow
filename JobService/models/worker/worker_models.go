@@ -9,13 +9,14 @@ import (
 )
 
 type JobResult struct {
-	JobID      string // think about using jobId as forieng key to job table
+	UserID     string  `json:"user_id"`
+	JobID      string  `json:"job_id" gorm:"index"`
 	ResultId   string `json:"result_id" gorm:"primaryKey"`
-	ResultKey  string
-	JobType    string
-	ResultData json.RawMessage
-	Status     string
-	Error      string
+	ResultKey  string `json:"result_key"`
+	JobType    string `json:"job_type"`
+	ResultData json.RawMessage `json:"result_data" gorm:"type:jsonb"`
+	Status     string `json:"status"`
+	Error      string `json:"error"`
 
 	gorm.Model
 }

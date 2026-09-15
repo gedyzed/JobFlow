@@ -25,3 +25,7 @@ func NewRelayService(repo repo.IRelayRepo, logger *slog.Logger) IRelayService {
 func (s *RelayService) PollAndPublish(ctx context.Context, limit int) error {
 	return s.repo.PollAndPublish(ctx, limit)
 }
+
+func (s *RelayService) PollAndPublishToJobService(ctx context.Context, limit int) error {
+	return s.repo.PollAndPublish(ctx, limit)
+}

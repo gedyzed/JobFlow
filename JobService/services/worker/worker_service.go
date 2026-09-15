@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/cockroachdb/errors"
 	"github.com/gedyzed/JobFlow/JobService/models"
+	workerModels "github.com/gedyzed/JobFlow/JobService/models/worker"
 	"github.com/gedyzed/JobFlow/JobService/repositories"
 )
 
@@ -50,7 +52,21 @@ func (w *WorkerService) StopWorker(ctx context.Context) error {
 }
 
 func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
+
 	w.logger.Info("Fetching published jobs")
+
+	target := models.PublisherTarget{
+		Queue:      "job_queue",
+		Exchange:   "job_exchange",
+		RoutingKey: "job_status_update",
+	}
+	publisher, err := w.rmqClient.NewPublisher(ctx, target)
+	if err != nil {
+		w.logger.Error("Failed to create publisher", "error", err)
+		return err
+	}
+	defer publisher.Close(ctx)
+
 	consumer, err := w.rmqClient.NewConsumer(ctx, "job_queue")
 	if err != nil {
 		w.logger.Error("Failed to create consumer", "error", err)
@@ -61,6 +77,7 @@ func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
 	w.logger.Info("Consumer listening on job_queue")
 	return consumer.Consume(ctx, func(ctx context.Context, body []byte) error {
 		w.logger.Info("Received job event", "payload_size", len(body))
+	
 
 		var job models.Job
 		if err := json.Unmarshal(body, &job); err != nil {
@@ -69,6 +86,8 @@ func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
 		}
 
 		w.logger.Info("Processing job", "job_id", job.JobID, "type", job.Type)
+		now := time.Now()
+		job.StartedAt = &now
 
 		// Update job status to running
 		if err := w.repo.UpdateJobStatus(ctx, job.JobID, models.StatusRunning); err != nil {
@@ -80,7 +99,19 @@ func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
 			if err := w.emailSender.SendEmail(ctx, job.Payload); err != nil {
 				w.logger.Error("Failed to send email", "job_id", job.JobID, "error", err)
 				_ = w.repo.UpdateJobStatus(ctx, job.JobID, models.StatusFailed)
-				_ = w.repo.SaveJobResult(ctx, job.JobID, fmt.Sprintf(`{"error": %q}`, err.Error()))
+				_ = w.repo.SaveJobResult(ctx, job.JobID, workerModels.JobResult{
+					JobID:      job.JobID,
+					UserID:     job.UserID,
+					JobType:    job.Type,
+					ResultData: json.RawMessage(fmt.Sprintf(`{"error": %q}`, err.Error())),
+					Status:     models.StatusFailed,
+				})
+				
+				now := time.Now()
+				job.CompletedAt = &now
+				job.Status = models.StatusFailed
+				job.Payload = json.RawMessage(fmt.Sprintf(`{"error": %q}`, err.Error()))
+				
 				return nil
 			}
 
@@ -88,7 +119,13 @@ func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
 			if err := w.repo.UpdateJobStatus(ctx, job.JobID, models.StatusCompleted); err != nil {
 				w.logger.Warn("Failed to update job status to completed", "job_id", job.JobID, "error", err)
 			}
-			if err := w.repo.SaveJobResult(ctx, job.JobID, `{"status": "email_sent"}`); err != nil {
+			if err := w.repo.SaveJobResult(ctx, job.JobID, workerModels.JobResult{
+				JobID:      job.JobID,
+				UserID:     job.UserID,
+				JobType:    job.Type,
+				ResultData: json.RawMessage(`{"status": "email_sent"}`),
+				Status:     models.StatusCompleted,
+			}); err != nil {
 				w.logger.Warn("Failed to save job result", "job_id", job.JobID, "error", err)
 			}
 		default:

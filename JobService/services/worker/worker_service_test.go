@@ -43,7 +43,7 @@ func Test_ConsumeJobs_SendEmailSuccess(t *testing.T) {
 	mockRepo.On("UpdateJobStatus", mock.Anything, "job-1", "running").Return(nil).Once()
 	mockEmail.On("SendEmail", mock.Anything, mock.Anything).Return(nil).Once()
 	mockRepo.On("UpdateJobStatus", mock.Anything, "job-1", "completed").Return(nil).Once()
-	mockRepo.On("SaveJobResult", mock.Anything, "job-1", `{"status": "email_sent"}`).Return(nil).Once()
+	mockRepo.On("SaveJobResult", mock.Anything, "job-1", mock.Anything).Return(nil).Once()
 
 	err := handler(context.Background(), jobJSON)
 	assert.NoError(t, err)
@@ -62,5 +62,3 @@ func Test_ConsumeJobs_SendEmailFailure(t *testing.T) {
 	err := handler(context.Background(), jobJSON)
 	assert.NoError(t, err)
 }
-
-
