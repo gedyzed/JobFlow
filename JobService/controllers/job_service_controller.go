@@ -53,13 +53,13 @@ func (c *JobServiceController) CreateJob(w http.ResponseWriter, r *http.Request)
 	}
 
 	job := req.ToJob()
-		createdJob, err := c.service.CreateJob(job, idempotencyKey)
+	createdJob, err := c.service.CreateJob(job, idempotencyKey)
 	if err != nil {
 		c.writeError(w, err)
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, createdJob)
+	writeJSON(w, http.StatusCreated, createdJob.ToResponse())
 }
 
 // GetJobByID fetches a single job by its unique identifier.
@@ -76,7 +76,7 @@ func (c *JobServiceController) GetJobByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	writeJSON(w, http.StatusOK, job)
+	writeJSON(w, http.StatusOK, job.ToResponse())
 }
 
 // ListJobs fetches all jobs.
@@ -87,7 +87,12 @@ func (c *JobServiceController) ListJobs(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	writeJSON(w, http.StatusOK, jobs)
+	responses := make([]*models.JobResponse, len(jobs))
+	for i, j := range jobs {
+		responses[i] = j.ToResponse()
+	}
+
+	writeJSON(w, http.StatusOK, responses)
 }
 
 // UpdateJob updates an existing job after validating the update payload.

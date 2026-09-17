@@ -35,6 +35,38 @@ func (job *Job) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+type JobResponse struct {
+	JobID       string     `json:"job_id"`
+	UserID      string     `json:"user_id"`
+	Type        string     `json:"type"`
+	Status      string     `json:"status"`
+	ResultKey   *string    `json:"result_key,omitempty"`
+	Error       *string    `json:"error,omitempty"`
+	ScheduledAt *time.Time `json:"scheduled_at,omitempty"`
+	StartedAt   *time.Time `json:"started_at,omitempty"`
+	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	CreatedAt   time.Time  `json:"created_at"`
+}
+
+// ToResponse converts a Job domain model into a client-facing JobResponse DTO.
+func (job *Job) ToResponse() *JobResponse {
+	if job == nil {
+		return nil
+	}
+	return &JobResponse{
+		JobID:       job.JobID,
+		UserID:      job.UserID,
+		Type:        job.Type,
+		Status:      job.Status,
+		ResultKey:   job.ResultKey,
+		Error:       job.Error,
+		ScheduledAt: job.ScheduledAt,
+		StartedAt:   job.StartedAt,
+		CompletedAt: job.CompletedAt,
+		CreatedAt:   job.CreatedAt,
+	}
+}
+
 type Outbox struct {
 	gorm.Model
 
