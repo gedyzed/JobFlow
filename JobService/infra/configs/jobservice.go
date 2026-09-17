@@ -3,8 +3,9 @@ package configs
 import "github.com/cockroachdb/errors"
 
 type JobServiceConfig struct {
-	APP APPConfig
-	DB  DBConfig
+	APP      APPConfig
+	DB       DBConfig
+	RabbitMQ RabbitMQConfig
 }
 
 func LoadJobServiceConfig() (*JobServiceConfig, error) {
@@ -14,8 +15,14 @@ func LoadJobServiceConfig() (*JobServiceConfig, error) {
 		return nil, errors.Wrap(err, "load jobservice database config")
 	}
 
+	rmqCfg, err := LoadRabbitMQConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "load jobservice rabbitmq config")
+	}
+
 	return &JobServiceConfig{
-		APP: appCfg,
-		DB:  *dbCfg,
+		APP:      appCfg,
+		DB:       *dbCfg,
+		RabbitMQ: *rmqCfg,
 	}, nil
 }

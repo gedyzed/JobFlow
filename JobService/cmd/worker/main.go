@@ -31,7 +31,7 @@ func main() {
 
 	logDir := "logs"
 	if mkErr := os.MkdirAll(logDir, 0o755); mkErr != nil {
-		slog.Error("failed to create log directory: %v", mkErr)
+		slog.Error("failed to create log directory", "error", mkErr)
 	}
 
 	logPath := filepath.Join(logDir, "worker.txt")
@@ -110,6 +110,28 @@ func main() {
 		}
 	}()
 
+	// Setup topic exchange and bind worker queue
+	exchangeName := cfg.RabbitMQ.Exchange
+	if exchangeName == "" {
+		exchangeName = "job_exchange"
+	}
+	if err := rmqClient.DeclareExchange(ctx, exchangeName, "topic"); err != nil {
+		slog.Error("Failed to declare topic exchange", "exchange", exchangeName, "error", err)
+		os.Exit(1)
+	}
+	queueName := cfg.RabbitMQ.Name
+	if queueName == "" {
+		queueName = "job_queue"
+	}
+
+	for _, routingKey := range []string{"job.request.#", "job.created"} {
+		if err := rmqClient.BindQueue(ctx, queueName, exchangeName, routingKey); err != nil {
+			slog.Error("Failed to bind worker queue to exchange", "queue", queueName, "exchange", exchangeName, "routing_key", routingKey, "error", err)
+			os.Exit(1)
+		}
+		slog.Info("Worker queue bound to exchange", "queue", queueName, "exchange", exchangeName, "routing_key", routingKey)
+	}
+
 	err = workerService.StartWorker(ctx)
 	if err != nil {
 		slog.Error("Failed to start worker", "error", err, "error_detail", fmt.Sprintf("%+v", err))
@@ -117,5 +139,6 @@ func main() {
 	}
 
 	<-ctx.Done()
+
 
 }

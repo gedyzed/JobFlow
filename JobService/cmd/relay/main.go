@@ -15,7 +15,6 @@ import (
 
 	infra "github.com/gedyzed/JobFlow/JobService/infra"
 	configs "github.com/gedyzed/JobFlow/JobService/infra/configs"
-	"github.com/gedyzed/JobFlow/JobService/models"
 	"github.com/gedyzed/JobFlow/JobService/repositories"
 	"github.com/gedyzed/JobFlow/JobService/services"
 	"github.com/joho/godotenv"
@@ -95,33 +94,63 @@ func main() {
 		}
 	}()
 
-	// Create dedicated publisher for outbox relay
-	queueName := cfg.RabbitMQ.Name
-	if queueName == "" {
-		queueName = "job_queue"
+	// Setup topic exchange and queue bindings
+	exchangeName := cfg.RabbitMQ.Exchange
+	if exchangeName == "" {
+		exchangeName = "job_exchange"
 	}
-	publisher, err := rmqClient.NewPublisher(ctx, models.PublisherTarget{
-		Queue: queueName,
-	})
-	if err != nil {
-		slog.Error("Failed to create RabbitMQ publisher", "error", err)
+
+	if err := rmqClient.DeclareExchange(ctx, exchangeName, "topic"); err != nil {
+		slog.Error("Failed to declare topic exchange", "exchange", exchangeName, "error", err)
 		os.Exit(1)
 	}
+
+	// Declare and bind job queue (for workers: requests)
+	jobQueueName := cfg.RabbitMQ.Name
+	if jobQueueName == "" {
+		jobQueueName = "job_queue"
+	}
+	if err := rmqClient.DeclareQueue(ctx, jobQueueName); err != nil {
+		slog.Error("Failed to declare job queue", "queue", jobQueueName, "error", err)
+		os.Exit(1)
+	}
+
+	for _, routingKey := range []string{"job.request.#", "job.created"} {
+		if err := rmqClient.BindQueue(ctx, jobQueueName, exchangeName, routingKey); err != nil {
+			slog.Error("Failed to bind job queue to exchange", "queue", jobQueueName, "exchange", exchangeName, "routing_key", routingKey, "error", err)
+			os.Exit(1)
+		}
+	}
+
+	// Declare and bind output queue (for job service: job.output.#)
+	outputQueueName := "job_output_queue"
+	if err := rmqClient.DeclareQueue(ctx, outputQueueName); err != nil {
+		slog.Error("Failed to declare output queue", "queue", outputQueueName, "error", err)
+		os.Exit(1)
+	}
+	if err := rmqClient.BindQueue(ctx, outputQueueName, exchangeName, "job.output.#"); err != nil {
+		slog.Error("Failed to bind output queue to exchange", "queue", outputQueueName, "exchange", exchangeName, "error", err)
+		os.Exit(1)
+	}
+
+	// Create exchange relay publisher (routes by event_type as routing key)
+	exchangePublisher := infra.NewExchangeRelayPublisher(rmqClient, exchangeName, logger)
 	defer func() {
 		closeCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if err := publisher.Close(closeCtx); err != nil {
-			slog.Error("Failed to cleanly close publisher", "error", err)
+		if err := exchangePublisher.Close(closeCtx); err != nil {
+			slog.Error("Failed to cleanly close exchange publisher", "error", err)
 		}
 	}()
 
 	// Initialize relay repository and service
-	relayRepo := repositories.NewRelayRepo(db, publisher, logger)
+	relayRepo := repositories.NewRelayRepo(db, exchangePublisher, logger)
 	relayService := services.NewRelayService(relayRepo, logger)
 
 	outboxRelay := infra.NewOutboxRelay(2*time.Second, relayService, logger)
 
-	slog.Info("Starting outbox relay process...")
+	slog.Info("Starting outbox relay process...", "exchange", exchangeName, "job_queue", jobQueueName, "output_queue", outputQueueName)
 	outboxRelay.Start(ctx)
 	slog.Info("Outbox relay process stopped cleanly")
 }
+

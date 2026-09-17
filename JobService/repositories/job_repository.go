@@ -54,9 +54,10 @@ func (r *JobRepo) CreateJob(job *models.Job) (*models.Job, error) {
 		}
 
 		outbox := &models.Outbox{
-			EventType: "job.created",
+			EventType: "job.request.created",
 			Payload:   payload,
 			JobID:     job.JobID,
+			Service:   "job_service",
 		}
 		if err := tx.Create(outbox).Error; err != nil {
 			return errors.Wrap(err, "insert outbox event")

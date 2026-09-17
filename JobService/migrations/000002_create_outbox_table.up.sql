@@ -9,8 +9,9 @@ CREATE TABLE outboxes (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMPTZ NULL,
-    Attempts        Int  DEFAULT 0,
-	LastError       TEXT NULL,
+    attempts        Int  DEFAULT 0,
+	last_error      TEXT NULL,
+    service         VARCHAR(50) NOT NULL,
 
     CONSTRAINT pk_outboxes PRIMARY KEY (outbox_id),
 

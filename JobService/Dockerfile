@@ -12,6 +12,6 @@ WORKDIR /server
 COPY --from=builder /server/server .
 COPY --from=builder /server/relay .
 COPY --from=builder /server/worker .
-COPY --from=builder /server/worker .
+
 EXPOSE 8080
 ENTRYPOINT ["/server/server"]

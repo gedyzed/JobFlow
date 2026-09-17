@@ -53,15 +53,22 @@ func TestWorkerRepository_SaveJobResult_NewRecord(t *testing.T) {
 		Status:     models.StatusCompleted,
 	}
 
+	// Transaction wraps SELECT + INSERT job_result + INSERT outbox
+	mock.ExpectBegin()
+
 	// 1. SELECT query finds no existing record
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "job_results" WHERE job_id = $1 AND "job_results"."deleted_at" IS NULL ORDER BY "job_results"."id" LIMIT $2`)).
 		WithArgs(jobID, 1).
 		WillReturnError(gorm.ErrRecordNotFound)
 
-	// 2. INSERT new record
-	mock.ExpectBegin()
+	// 2. INSERT new job result
 	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "job_results"`)).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
+	// 3. INSERT outbox event for worker result
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "outboxes"`)).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
 	mock.ExpectCommit()
 
 	err := repo.SaveJobResult(context.Background(), jobID, result)
@@ -83,6 +90,9 @@ func TestWorkerRepository_SaveJobResult_ExistingRecord(t *testing.T) {
 		Status:     models.StatusCompleted,
 	}
 
+	// Transaction wraps SELECT + UPDATE job_result + INSERT outbox
+	mock.ExpectBegin()
+
 	// 1. SELECT query finds existing record
 	columns := []string{"id", "result_id", "job_id", "status", "result_data", "created_at", "updated_at", "deleted_at"}
 	rows := sqlmock.NewRows(columns).
@@ -93,9 +103,13 @@ func TestWorkerRepository_SaveJobResult_ExistingRecord(t *testing.T) {
 		WillReturnRows(rows)
 
 	// 2. UPDATE existing record
-	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "job_results"`)).
 		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// 3. INSERT outbox event for worker result
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "outboxes"`)).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
 	mock.ExpectCommit()
 
 	err := repo.SaveJobResult(context.Background(), jobID, result)
@@ -161,19 +175,114 @@ func TestWorkerRepository_DeleteJobResult(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestWorkerRepository_UpdateJobStatus(t *testing.T) {
+func TestWorkerRepository_GetJobResultRecord_Found(t *testing.T) {
 	gormDB, mock, rawDB := setupTestDB(t)
 	defer rawDB.Close()
 
 	repo := NewWorkerRepository(gormDB, newTestLogger())
 	jobID := "job-123"
 
+	columns := []string{"result_id", "job_id", "status", "job_type", "created_at", "updated_at", "deleted_at"}
+	rows := sqlmock.NewRows(columns).
+		AddRow("res-1", jobID, "completed", "SEND_EMAIL", time.Now(), time.Now(), nil)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "job_results" WHERE job_id = $1 AND "job_results"."deleted_at" IS NULL ORDER BY "job_results"."id" LIMIT $2`)).
+		WithArgs(jobID, 1).
+		WillReturnRows(rows)
+
+	res, err := repo.GetJobResultRecord(context.Background(), jobID)
+	assert.NoError(t, err)
+	require.NotNil(t, res)
+	assert.Equal(t, jobID, res.JobID)
+	assert.Equal(t, "completed", res.Status)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestWorkerRepository_GetJobResultRecord_NotFound(t *testing.T) {
+	gormDB, mock, rawDB := setupTestDB(t)
+	defer rawDB.Close()
+
+	repo := NewWorkerRepository(gormDB, newTestLogger())
+	jobID := "job-404"
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "job_results" WHERE job_id = $1 AND "job_results"."deleted_at" IS NULL ORDER BY "job_results"."id" LIMIT $2`)).
+		WithArgs(jobID, 1).
+		WillReturnError(gorm.ErrRecordNotFound)
+
+	res, err := repo.GetJobResultRecord(context.Background(), jobID)
+	assert.NoError(t, err)
+	assert.Nil(t, res)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestWorkerRepository_SaveJobResultStatus_NewRecord(t *testing.T) {
+	gormDB, mock, rawDB := setupTestDB(t)
+	defer rawDB.Close()
+
+	repo := NewWorkerRepository(gormDB, newTestLogger())
+	jobID := "job-123"
+
+	// Transaction wraps: SELECT + INSERT job_results + INSERT outboxes
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "jobs" SET`)).
-		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// 1. SELECT query finds no existing record
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "job_results" WHERE job_id = $1 AND "job_results"."deleted_at" IS NULL ORDER BY "job_results"."id" LIMIT $2`)).
+		WithArgs(jobID, 1).
+		WillReturnError(gorm.ErrRecordNotFound)
+
+	// 2. INSERT new job result with running status
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "job_results"`)).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
+	// 3. INSERT outbox event for running status
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "outboxes"`)).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
 	mock.ExpectCommit()
 
-	err := repo.UpdateJobStatus(context.Background(), jobID, models.StatusCompleted)
+	err := repo.SaveJobResultStatus(context.Background(), jobID, models.StatusRunning, workerModels.JobResult{
+		JobID:   jobID,
+		UserID:  "user-1",
+		JobType: "SEND_EMAIL",
+	})
+	assert.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestWorkerRepository_SaveJobResultStatus_ExistingRecord(t *testing.T) {
+	gormDB, mock, rawDB := setupTestDB(t)
+	defer rawDB.Close()
+
+	repo := NewWorkerRepository(gormDB, newTestLogger())
+	jobID := "job-123"
+
+	// Transaction wraps: SELECT + UPDATE job_results + INSERT outboxes
+	mock.ExpectBegin()
+
+	// 1. SELECT query finds existing record
+	columns := []string{"id", "result_id", "job_id", "status", "created_at", "updated_at", "deleted_at"}
+	rows := sqlmock.NewRows(columns).
+		AddRow(uint(1), "res-1", jobID, "pending", time.Now(), time.Now(), nil)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "job_results" WHERE job_id = $1 AND "job_results"."deleted_at" IS NULL ORDER BY "job_results"."id" LIMIT $2`)).
+		WithArgs(jobID, 1).
+		WillReturnRows(rows)
+
+	// 2. UPDATE existing job result
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "job_results"`)).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	// 3. INSERT outbox event for running status
+	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "outboxes"`)).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
+	mock.ExpectCommit()
+
+	err := repo.SaveJobResultStatus(context.Background(), jobID, models.StatusRunning, workerModels.JobResult{
+		JobID:   jobID,
+		UserID:  "user-1",
+		JobType: "SEND_EMAIL",
+	})
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

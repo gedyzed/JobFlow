@@ -24,6 +24,7 @@ type RabbitMQConfig struct {
 	User     string
 	Password string
 	Name     string
+	Exchange string
 }
 
 type DBConfig struct {
@@ -101,6 +102,11 @@ func LoadRabbitMQConfig() (*RabbitMQConfig, error) {
 		rmqName = "job_queue"
 	}
 
+	rmqExchange := os.Getenv("RABBITMQ_EXCHANGE")
+	if rmqExchange == "" {
+		rmqExchange = "job_exchange"
+	}
+
 	if err := validateRequiredConfig(map[string]string{
 		"RABBITMQ_HOST":     rmqHost,
 		"RABBITMQ_PORT":     rmqPort,
@@ -117,6 +123,7 @@ func LoadRabbitMQConfig() (*RabbitMQConfig, error) {
 		User:     rmqUser,
 		Password: rmqPassword,
 		Name:     rmqName,
+		Exchange: rmqExchange,
 	}, nil
 }
 

@@ -45,6 +45,8 @@ type Outbox struct {
 	PublishedAt *time.Time      `json:"published_at,omitempty"`
 	Attempts    int             `json:"attempts" gorm:"default:0"`
 	LastError   *string         `json:"lasterror,omitempty"`
+	Service     string          `json:"service" gorm:"not null"`
+	Published   bool            `json:"published" gorm:"default:false"`
 }
 
 func (outbox *Outbox) BeforeCreate(tx *gorm.DB) error {

@@ -64,19 +64,22 @@ func (r *RelayRepo) PollAndPublish(ctx context.Context, limit int) error {
 		}
 		for _, row := range rows {
 			if err := r.Publisher.PublishEvent(ctx, row); err != nil {
-				r.logger.Error("Failed to publish event", "error", err, "event_id", row.ID)
+				r.logger.Error("Failed to publish event", "error", err, "event_id", row.ID, "service", row.Service)
 				continue
 			}
-			scheduledAt := time.Now()
-			if err := tx.WithContext(ctx).
-				Model(&models.Job{}).
-				Where("job_id = ?", row.JobID).
-				Updates(map[string]interface{}{
-					"status":       models.StatusScheduled,
-					"scheduled_at": scheduledAt,
-				}).Error; err != nil {
-				r.logger.Error("Failed to mark job as scheduled", "error", err, "job_id", row.JobID, "event_id", row.ID)
-				continue
+			// Only update job status to scheduled for job_service events
+			if row.Service == "job_service" {
+				scheduledAt := time.Now()
+				if err := tx.WithContext(ctx).
+					Model(&models.Job{}).
+					Where("job_id = ?", row.JobID).
+					Updates(map[string]interface{}{
+						"status":       models.StatusScheduled,
+						"scheduled_at": scheduledAt,
+					}).Error; err != nil {
+					r.logger.Error("Failed to mark job as scheduled", "error", err, "job_id", row.JobID, "event_id", row.ID)
+					continue
+				}
 			}
 			if err := tx.WithContext(ctx).
 				Model(&models.Outbox{}).

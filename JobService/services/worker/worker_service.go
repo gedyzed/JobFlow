@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/cockroachdb/errors"
 	"github.com/gedyzed/JobFlow/JobService/models"
@@ -55,18 +54,6 @@ func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
 
 	w.logger.Info("Fetching published jobs")
 
-	target := models.PublisherTarget{
-		Queue:      "job_queue",
-		Exchange:   "job_exchange",
-		RoutingKey: "job_status_update",
-	}
-	publisher, err := w.rmqClient.NewPublisher(ctx, target)
-	if err != nil {
-		w.logger.Error("Failed to create publisher", "error", err)
-		return err
-	}
-	defer publisher.Close(ctx)
-
 	consumer, err := w.rmqClient.NewConsumer(ctx, "job_queue")
 	if err != nil {
 		w.logger.Error("Failed to create consumer", "error", err)
@@ -77,7 +64,6 @@ func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
 	w.logger.Info("Consumer listening on job_queue")
 	return consumer.Consume(ctx, func(ctx context.Context, body []byte) error {
 		w.logger.Info("Received job event", "payload_size", len(body))
-	
 
 		var job models.Job
 		if err := json.Unmarshal(body, &job); err != nil {
@@ -85,40 +71,54 @@ func (w *WorkerService) ConsumeJobs(ctx context.Context) error {
 			return errors.Wrap(err, "unmarshal job event")
 		}
 
-		w.logger.Info("Processing job", "job_id", job.JobID, "type", job.Type)
-		now := time.Now()
-		job.StartedAt = &now
+		if job.JobID == "" || job.Type == "" {
+			w.logger.Warn("Ignoring invalid message: missing job_id or type", "job_id", job.JobID, "type", job.Type)
+			return nil
+		}
 
-		// Update job status to running
-		if err := w.repo.UpdateJobStatus(ctx, job.JobID, models.StatusRunning); err != nil {
-			w.logger.Warn("Failed to update job status to running", "job_id", job.JobID, "error", err)
+		w.logger.Info("Processing job", "job_id", job.JobID, "type", job.Type)
+
+		// Deduplication check: check if already processed in job_results table
+		existing, err := w.repo.GetJobResultRecord(ctx, job.JobID)
+		if err != nil {
+			w.logger.Error("Failed to query job result for deduplication", "job_id", job.JobID, "error", err)
+			return err
+		}
+		if existing != nil && existing.Status == models.StatusCompleted {
+			w.logger.Info("Job already completed, skipping duplicate execution", "job_id", job.JobID)
+			return nil
+		}
+
+		// Record running status in worker's job_results table (does not touch Job table)
+		if err := w.repo.SaveJobResultStatus(ctx, job.JobID, models.StatusRunning, workerModels.JobResult{
+			JobID:   job.JobID,
+			UserID:  job.UserID,
+			JobType: job.Type,
+			Status:  models.StatusRunning,
+		}); err != nil {
+			w.logger.Warn("Failed to record running status in job_results", "job_id", job.JobID, "error", err)
 		}
 
 		switch job.Type {
 		case "SEND_EMAIL":
 			if err := w.emailSender.SendEmail(ctx, job.Payload); err != nil {
 				w.logger.Error("Failed to send email", "job_id", job.JobID, "error", err)
-				_ = w.repo.UpdateJobStatus(ctx, job.JobID, models.StatusFailed)
-				_ = w.repo.SaveJobResult(ctx, job.JobID, workerModels.JobResult{
+				// Save failed result + outbox event atomically
+				if saveErr := w.repo.SaveJobResult(ctx, job.JobID, workerModels.JobResult{
 					JobID:      job.JobID,
 					UserID:     job.UserID,
 					JobType:    job.Type,
 					ResultData: json.RawMessage(fmt.Sprintf(`{"error": %q}`, err.Error())),
 					Status:     models.StatusFailed,
-				})
-				
-				now := time.Now()
-				job.CompletedAt = &now
-				job.Status = models.StatusFailed
-				job.Payload = json.RawMessage(fmt.Sprintf(`{"error": %q}`, err.Error()))
-				
+					Error:      err.Error(),
+				}); saveErr != nil {
+					w.logger.Error("Failed to save failed job result", "job_id", job.JobID, "error", saveErr)
+				}
 				return nil
 			}
 
 			w.logger.Info("Email sent successfully", "job_id", job.JobID)
-			if err := w.repo.UpdateJobStatus(ctx, job.JobID, models.StatusCompleted); err != nil {
-				w.logger.Warn("Failed to update job status to completed", "job_id", job.JobID, "error", err)
-			}
+			// Save successful result + outbox event atomically
 			if err := w.repo.SaveJobResult(ctx, job.JobID, workerModels.JobResult{
 				JobID:      job.JobID,
 				UserID:     job.UserID,

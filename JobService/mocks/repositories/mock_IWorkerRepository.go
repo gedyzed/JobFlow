@@ -175,17 +175,76 @@ func (_c *MockIWorkerRepository_SaveJobResult_Call) RunAndReturn(run func(contex
 	return _c
 }
 
-// UpdateJobStatus provides a mock function with given fields: ctx, jobID, status
-func (_m *MockIWorkerRepository) UpdateJobStatus(ctx context.Context, jobID string, status string) error {
-	ret := _m.Called(ctx, jobID, status)
+// GetJobResultRecord provides a mock function with given fields: ctx, jobID
+func (_m *MockIWorkerRepository) GetJobResultRecord(ctx context.Context, jobID string) (*worker.JobResult, error) {
+	ret := _m.Called(ctx, jobID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdateJobStatus")
+		panic("no return value specified for GetJobResultRecord")
+	}
+
+	var r0 *worker.JobResult
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*worker.JobResult, error)); ok {
+		return rf(ctx, jobID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *worker.JobResult); ok {
+		r0 = rf(ctx, jobID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*worker.JobResult)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, jobID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockIWorkerRepository_GetJobResultRecord_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetJobResultRecord'
+type MockIWorkerRepository_GetJobResultRecord_Call struct {
+	*mock.Call
+}
+
+// GetJobResultRecord is a helper method to define mock.On call
+//   - ctx context.Context
+//   - jobID string
+func (_e *MockIWorkerRepository_Expecter) GetJobResultRecord(ctx interface{}, jobID interface{}) *MockIWorkerRepository_GetJobResultRecord_Call {
+	return &MockIWorkerRepository_GetJobResultRecord_Call{Call: _e.mock.On("GetJobResultRecord", ctx, jobID)}
+}
+
+func (_c *MockIWorkerRepository_GetJobResultRecord_Call) Run(run func(ctx context.Context, jobID string)) *MockIWorkerRepository_GetJobResultRecord_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockIWorkerRepository_GetJobResultRecord_Call) Return(_a0 *worker.JobResult, _a1 error) *MockIWorkerRepository_GetJobResultRecord_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockIWorkerRepository_GetJobResultRecord_Call) RunAndReturn(run func(context.Context, string) (*worker.JobResult, error)) *MockIWorkerRepository_GetJobResultRecord_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SaveJobResultStatus provides a mock function with given fields: ctx, jobID, status, result
+func (_m *MockIWorkerRepository) SaveJobResultStatus(ctx context.Context, jobID string, status string, result worker.JobResult) error {
+	ret := _m.Called(ctx, jobID, status, result)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveJobResultStatus")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, jobID, status)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, worker.JobResult) error); ok {
+		r0 = rf(ctx, jobID, status, result)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -193,32 +252,33 @@ func (_m *MockIWorkerRepository) UpdateJobStatus(ctx context.Context, jobID stri
 	return r0
 }
 
-// MockIWorkerRepository_UpdateJobStatus_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateJobStatus'
-type MockIWorkerRepository_UpdateJobStatus_Call struct {
+// MockIWorkerRepository_SaveJobResultStatus_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveJobResultStatus'
+type MockIWorkerRepository_SaveJobResultStatus_Call struct {
 	*mock.Call
 }
 
-// UpdateJobStatus is a helper method to define mock.On call
+// SaveJobResultStatus is a helper method to define mock.On call
 //   - ctx context.Context
 //   - jobID string
 //   - status string
-func (_e *MockIWorkerRepository_Expecter) UpdateJobStatus(ctx interface{}, jobID interface{}, status interface{}) *MockIWorkerRepository_UpdateJobStatus_Call {
-	return &MockIWorkerRepository_UpdateJobStatus_Call{Call: _e.mock.On("UpdateJobStatus", ctx, jobID, status)}
+//   - result worker.JobResult
+func (_e *MockIWorkerRepository_Expecter) SaveJobResultStatus(ctx interface{}, jobID interface{}, status interface{}, result interface{}) *MockIWorkerRepository_SaveJobResultStatus_Call {
+	return &MockIWorkerRepository_SaveJobResultStatus_Call{Call: _e.mock.On("SaveJobResultStatus", ctx, jobID, status, result)}
 }
 
-func (_c *MockIWorkerRepository_UpdateJobStatus_Call) Run(run func(ctx context.Context, jobID string, status string)) *MockIWorkerRepository_UpdateJobStatus_Call {
+func (_c *MockIWorkerRepository_SaveJobResultStatus_Call) Run(run func(ctx context.Context, jobID string, status string, result worker.JobResult)) *MockIWorkerRepository_SaveJobResultStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(worker.JobResult))
 	})
 	return _c
 }
 
-func (_c *MockIWorkerRepository_UpdateJobStatus_Call) Return(_a0 error) *MockIWorkerRepository_UpdateJobStatus_Call {
+func (_c *MockIWorkerRepository_SaveJobResultStatus_Call) Return(_a0 error) *MockIWorkerRepository_SaveJobResultStatus_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MockIWorkerRepository_UpdateJobStatus_Call) RunAndReturn(run func(context.Context, string, string) error) *MockIWorkerRepository_UpdateJobStatus_Call {
+func (_c *MockIWorkerRepository_SaveJobResultStatus_Call) RunAndReturn(run func(context.Context, string, string, worker.JobResult) error) *MockIWorkerRepository_SaveJobResultStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }
